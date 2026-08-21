@@ -29,18 +29,18 @@
           </view>
           <!-- 下部---信息简介 -->
           <view class="info_bottom">
-            <view>
-              <view class="word">苍穹餐厅为顾客打造专业的大众化美食外送餐饮</view>
-              <view class="address">
-                <icon></icon>
-                {{ shopInfo().shopAddress || "商家店铺获取中.." }}
-              </view>
-            </view>
-            <view>
-              <view class="phone" @click="handlePhone('bottom')">
-                <icon class="phoneIcon"></icon>
-              </view>
-            </view>
+				<view>
+				  <view class="word">苍穹餐厅为顾客打造专业的大众化美食外送餐饮</view>
+				  <view class="address">
+					<view class="address_icon"></view>
+					{{ shopInfo().shopAddress || "商家店铺获取中.." }}
+				  </view>
+				</view>
+				<view>
+				  <view class="phone" @click="handlePhone('bottom')">
+					<view class="phoneIcon"></view>
+				  </view>
+				</view>
           </view>
         </view>
       </view>
@@ -129,10 +129,10 @@
       </view>
       <!-- end -->
       <!-- 选择多规格弹层 - start -->
-      <view class="pop_mask" v-show="openMoreNormPop">
-        <popMask :moreNormDishdata="moreNormDishdata" :moreNormdata="moreNormdata" :flavorDataes="flavorDataes"
-          @checkMoreNormPop="checkMoreNormPop" @addShop="addShop" @closeMoreNorm="closeMoreNorm"></popMask>
-      </view>
+	  <view class="pop_mask" v-if="openMoreNormPop && moreNormDishdata">
+		<popMask :moreNormDishdata="moreNormDishdata" :moreNormdata="moreNormdata" :flavorDataes="flavorDataes"
+		  @checkMoreNormPop="checkMoreNormPop" @addShop="addShop" @closeMoreNorm="closeMoreNorm"></popMask>
+	  </view>
       <!-- 选择多规格 - end -->
       <!-- 菜品详情弹层 - start -->
       <!-- openDetailHandle 这个函数触发的菜品详情 -->

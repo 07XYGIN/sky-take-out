@@ -26,11 +26,32 @@ export default {
 		// 	return num
 		// }
 		ht: function () {
-			let res = uni.getMenuButtonBoundingClientRect() 
+			let res = this.getMenuButtonRect()
 			return res.top +5
 		}
 	},
 	methods: {
+		getMenuButtonRect() {
+			const systemInfo = uni.getSystemInfoSync ? uni.getSystemInfoSync() : {}
+			const fallbackTop = (systemInfo.statusBarHeight || 0) + 8
+			const fallbackHeight = 32
+			// #ifdef H5
+			return {
+				top: fallbackTop,
+				height: fallbackHeight
+			}
+			// #endif
+			if (typeof uni.getMenuButtonBoundingClientRect === 'function') {
+				const rect = uni.getMenuButtonBoundingClientRect()
+				if (rect && typeof rect.top === 'number' && typeof rect.height === 'number') {
+					return rect
+				}
+			}
+			return {
+				top: fallbackTop,
+				height: fallbackHeight
+			}
+		},
 		myCenterFun () {
 			uni.navigateTo({
 				url: '/pages/my/my'

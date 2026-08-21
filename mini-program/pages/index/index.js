@@ -114,11 +114,8 @@ export default {
 			return orderData
 		},
 		ht: function () {
-			return (
-				uni.getMenuButtonBoundingClientRect().top +
-				uni.getMenuButtonBoundingClientRect().height +
-				7
-			)
+			const rect = this.getMenuButtonRect()
+			return rect.top + rect.height + 7
 		},
 	},
 
@@ -167,6 +164,31 @@ export default {
 			"token", //token
 			"deliveryFee", //配送费
 		]),
+		getMenuButtonRect() {
+			const systemInfo = uni.getSystemInfoSync ? uni.getSystemInfoSync() : {}
+			const fallbackTop = (systemInfo.statusBarHeight || 0) + 8
+			const fallbackHeight = 32
+			// #ifdef H5
+			return {
+				top: fallbackTop,
+				height: fallbackHeight,
+			}
+			// #endif
+			if (typeof uni.getMenuButtonBoundingClientRect === "function") {
+				const rect = uni.getMenuButtonBoundingClientRect()
+				if (
+					rect &&
+					typeof rect.top === "number" &&
+					typeof rect.height === "number"
+				) {
+					return rect
+				}
+			}
+			return {
+				top: fallbackTop,
+				height: fallbackHeight,
+			}
+		},
 		loginSync() {
 			return new Promise((resolve, reject) => {
 				uni.login({
@@ -180,7 +202,7 @@ export default {
 		},
 		// 获取用户信息
 		getData() {
-			let res = wx.getMenuButtonBoundingClientRect()
+			let res = this.getMenuButtonRect()
 			let _this = this
 			// 获取店铺状态
 			this.getShopInfo()
