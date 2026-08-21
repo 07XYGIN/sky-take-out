@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: sky-take-out
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/sky_take_out?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      password: ${REDIS_PASSWORD:}
+
+server:
+  servlet:
+    context-path: /api
+  port: 8080
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.example.corelearning.mapper: debug
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY:please-change-this-dev-only-secret-key-32chars}
+  expire-time: 7200000

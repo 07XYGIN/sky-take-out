@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #17252c;
+  background: #f6f7f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
+body { background: #f6f7f5; font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; }
+button, input, textarea, select { font: inherit; }
+
+.admin-sider { position: relative; min-height: 100vh; background: #17252c !important; }
+.admin-sider .ant-layout-sider-children { background: #17252c; }
+.admin-sider .ant-menu { border-inline-end: 0; background: transparent; }
+.admin-sider .ant-menu-item { margin: 4px 0; color: rgba(255, 255, 255, 0.56); }
+.admin-sider .ant-menu-item:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.admin-sider .ant-menu-item-selected { color: #17252c; background: #e9a92f; font-weight: 600; }
+.admin-sider .ant-menu-item-selected::after { display: none; }
+.ant-layout-header { height: 68px; line-height: 68px; }
+.ant-table-wrapper .ant-table { border-radius: 6px; }
+.ant-table-wrapper .ant-table-thead > tr > th { background: #fafbfa; color: #68757a; font-size: 12px; font-weight: 600; }
+.ant-btn-primary { box-shadow: none; }
+.ant-card { border-color: #e3e8e7; box-shadow: 0 8px 24px rgba(23, 37, 44, 0.04); }
+.ant-form-item-label > label { color: #58666c; font-size: 13px; }
+
+.login-grid {
+  background-image: linear-gradient(rgba(255,255,255,.11) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.11) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+}
+
+@media (max-width: 991px) {
+  .admin-sider { position: fixed !important; z-index: 50; inset-block: 0; inset-inline-start: 0; }
+  .admin-sider:not(.ant-layout-sider-collapsed) { box-shadow: 20px 0 40px rgba(23, 37, 44, 0.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
