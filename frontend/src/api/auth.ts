@@ -6,6 +6,13 @@ export interface LoginPayload {
   password: string
 }
 
+export interface RegisterPayload {
+  username: string
+  password: string
+  name: string
+  phone?: string
+}
+
 export interface LoginResult {
   token?: string
   authorization?: string
@@ -18,6 +25,10 @@ export interface LoginResult {
 
 export function login(data: LoginPayload) {
   return requestData<LoginResult>({ method: 'post', url: '/employee/login', data })
+}
+
+export function register(data: RegisterPayload) {
+  return requestData<unknown>({ method: 'post', url: '/employee/register', data })
 }
 
 export function logout() {

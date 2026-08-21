@@ -9,6 +9,7 @@ import { EmployeePage } from '../pages/EmployeePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { OrderPage } from '../pages/OrderPage'
+import { RegisterPage } from '../pages/RegisterPage'
 import { SetmealPage } from '../pages/SetmealPage'
 import { StatisticsPage } from '../pages/StatisticsPage'
 
@@ -39,6 +40,7 @@ export function App() {
     >
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />

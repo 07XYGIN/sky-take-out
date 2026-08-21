@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button, Form, Input, message } from 'antd'
 import { ArrowRight, LockKeyhole, Store, UserRound } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
 import type { LoginPayload } from '../api/auth'
 import type { SessionUser } from '../types'
@@ -55,6 +55,10 @@ export function LoginPage() {
               </Form.Item>
               <Button type="primary" htmlType="submit" block loading={loading} icon={<ArrowRight size={17} />} iconPosition="end" className="mt-3 h-11 font-medium">进入运营台</Button>
             </Form>
+            <div className="mt-5 flex items-center justify-center gap-2 text-sm text-slate-500">
+              <span>还没有账号？</span>
+              <Link className="font-medium text-teal transition hover:text-ink" to="/register">去注册</Link>
+            </div>
             <div className="mt-10 flex items-center gap-2 border-t border-slate-200 pt-5 text-xs text-slate-400"><Store size={14} /> <span>苍穹外卖 · 门店管理端</span></div>
           </div>
         </section>
