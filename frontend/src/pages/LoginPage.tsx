@@ -22,7 +22,6 @@ export function LoginPage() {
         username: values.username,
         name: result.name,
         avatar: result.avatar,
-        roles: result.roles,
       };
       setSession(token, user);
       message.success("登录成功");

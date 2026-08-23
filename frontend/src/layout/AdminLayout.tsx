@@ -48,6 +48,7 @@ const routeNames: Record<string, string> = {
   "/dishes": "菜品管理",
   "/categories": "分类管理",
   "/employees": "员工管理",
+  "/profile": "账号信息",
 };
 
 export function AdminLayout() {
@@ -77,6 +78,10 @@ export function AdminLayout() {
   );
 
   const handleAccountAction: MenuProps["onClick"] = async ({ key }) => {
+    if (key === "profile") {
+      navigate("/profile");
+      return;
+    }
     if (key !== "logout") return;
     try {
       await logout();

@@ -1,6 +1,8 @@
 package com.example.sky.config;
 
 import com.example.sky.common.JwtUtil;
+import com.example.sky.common.TokenBlacklistService;
+import com.example.sky.mapper.EmployeeMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +22,8 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final EmployeeMapper employeeMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -35,7 +39,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtUtil.validateToken(token)) {
+        if (jwtUtil.validateToken(token)
+                && !tokenBlacklistService.isInvalid(token)
+                && isEmployeeEnabled(token)) {
             String username = jwtUtil.getUsernameFromToken(token);
 
             UsernamePasswordAuthenticationToken authentication =
@@ -44,5 +50,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isEmployeeEnabled(String token) {
+        String username = jwtUtil.getUsernameFromToken(token);
+        return Integer.valueOf(1).equals(employeeMapper.findStatusByUsername(username));
     }
 }

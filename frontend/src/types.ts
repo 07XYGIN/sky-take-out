@@ -16,6 +16,18 @@ export interface Employee {
   createTime?: string
 }
 
+export interface EmployeeProfile {
+  id: number
+  username: string
+  name: string
+  phone?: string
+  sex?: string
+  idNumber?: string
+  status: number
+  createTime?: string
+  updateTime?: string
+}
+
 export interface Category {
   id: number
   name: string
@@ -85,5 +97,4 @@ export interface SessionUser {
   username?: string
   name?: string
   avatar?: string
-  roles?: string[]
 }

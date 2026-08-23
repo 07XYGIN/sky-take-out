@@ -1,5 +1,5 @@
 import { requestData } from '../lib/http'
-import type { SessionUser } from '../types'
+import type { EmployeeProfile, SessionUser } from '../types'
 
 export interface LoginPayload {
   username: string
@@ -19,10 +19,18 @@ export interface LoginResult {
   token?: string
   authorization?: string
   user?: SessionUser
-  roles?: string[]
   name?: string
   avatar?: string
   [key: string]: unknown
+}
+
+export interface EmployeeCancelPayload {
+  password: string
+}
+
+export interface EmployeePasswordPayload {
+  oldPassword: string
+  newPassword: string
 }
 
 export function login(data: LoginPayload) {
@@ -35,4 +43,16 @@ export function register(data: RegisterPayload) {
 
 export function logout() {
   return requestData<unknown>({ method: 'post', url: '/employee/logout' })
+}
+
+export function getMyProfile() {
+  return requestData<EmployeeProfile>({ method: 'get', url: '/employee/me' })
+}
+
+export function cancelAccount(data: EmployeeCancelPayload) {
+  return requestData<unknown>({ method: 'post', url: '/employee/cancel', data })
+}
+
+export function changePassword(data: EmployeePasswordPayload) {
+  return requestData<unknown>({ method: 'put', url: '/employee/password', data })
 }

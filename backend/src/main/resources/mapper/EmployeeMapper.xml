@@ -21,6 +21,13 @@
         LIMIT 1
     </select>
 
+    <select id="findStatusByUsername" resultType="java.lang.Integer">
+        SELECT status
+        FROM employee
+        WHERE username = #{username}
+        LIMIT 1
+    </select>
+
     <insert id="insert" parameterType="com.example.sky.entity.Employee">
         INSERT INTO employee (
             id,
@@ -50,6 +57,13 @@
     <update id="updatePassword">
         UPDATE employee
         SET password = #{password},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE employee
+        SET status = #{status},
             update_time = NOW()
         WHERE id = #{id}
     </update>

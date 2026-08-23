@@ -9,6 +9,7 @@ import { EmployeePage } from "../pages/EmployeePage";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { OrderPage } from "../pages/OrderPage";
+import { ProfilePage } from "../pages/ProfilePage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { SetmealPage } from "../pages/SetmealPage";
 import { StatisticsPage } from "../pages/StatisticsPage";
@@ -50,6 +51,7 @@ export function App() {
           <Route path="/dishes" element={<DishPage />} />
           <Route path="/categories" element={<CategoryPage />} />
           <Route path="/employees" element={<EmployeePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

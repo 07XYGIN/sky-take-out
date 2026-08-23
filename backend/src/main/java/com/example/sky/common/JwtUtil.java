@@ -50,4 +50,13 @@ public class JwtUtil {
             return false;
         }
     }
+
+    public long getRemainingTimeMillis(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return Math.max(1000L, claims.getExpiration().getTime() - System.currentTimeMillis());
+    }
 }

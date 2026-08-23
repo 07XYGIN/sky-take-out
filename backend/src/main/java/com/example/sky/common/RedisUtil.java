@@ -15,6 +15,7 @@ public class RedisUtil {
 
     @Autowired
     private JsonMapper jsonMapper;
+
     public void set(String key, Object value, long timeout, TimeUnit unit) {
         String json = jsonMapper.writeValueAsString(value);
         redisTemplate.opsForValue().set(key, json, timeout, unit);
