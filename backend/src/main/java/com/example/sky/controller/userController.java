@@ -1,10 +1,10 @@
 package com.example.sky.controller;
 
 import com.example.sky.common.Result;
-import com.example.sky.dto.EmployeeLoginVo;
 import com.example.sky.dto.employeeDto;
 import com.example.sky.dto.employeeLoginDto;
 import com.example.sky.service.userService;
+import com.example.sky.vo.EmployeeLoginVo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -2,11 +2,6 @@ package com.example.sky.common;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-/**
- * 无 MyBatis-Plus 依赖的雪花算法 ID 生成器。
- * 单实例在当前服务进程内保证时间相同毫秒下的序列号递增。
- */
 @Component
 public class SnowflakeIdGenerator {
     private static final long EPOCH = 1735689600000L;

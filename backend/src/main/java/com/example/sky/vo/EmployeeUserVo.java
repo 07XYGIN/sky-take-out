@@ -1,4 +1,4 @@
-package com.example.sky.dto;
+package com.example.sky.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

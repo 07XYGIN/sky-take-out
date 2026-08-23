@@ -1,18 +1,18 @@
 package com.example.sky.service;
 
 import com.example.sky.common.JwtUtil;
+import com.example.sky.common.PasswordUtil;
 import com.example.sky.common.SnowflakeIdGenerator;
-import com.example.sky.dto.EmployeeLoginVo;
-import com.example.sky.dto.EmployeeUserVo;
 import com.example.sky.dto.employeeDto;
 import com.example.sky.dto.employeeLoginDto;
 import com.example.sky.entity.Employee;
 import com.example.sky.exception.BusinessException;
 import com.example.sky.mapper.EmployeeMapper;
+import com.example.sky.vo.EmployeeLoginVo;
+import com.example.sky.vo.EmployeeUserVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class userService {
     private final EmployeeMapper employeeMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordUtil passwordUtil;
     private final JwtUtil jwtUtil;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
@@ -40,7 +40,7 @@ public class userService {
         employee.setId(snowflakeIdGenerator.nextId());
         employee.setName(empDto.getName().trim());
         employee.setUsername(username);
-        employee.setPassword(passwordEncoder.encode(empDto.getPassword()));
+        employee.setPassword(passwordUtil.encode(empDto.getPassword()));
         employee.setPhone(empDto.getPhone().trim());
         employee.setSex(empDto.getSex());
         employee.setIdNumber(empDto.getIdNumber().toUpperCase());
@@ -80,18 +80,6 @@ public class userService {
         if (storedPassword == null) {
             return false;
         }
-        if (passwordEncoder.matches(rawPassword, storedPassword)) {
-            return true;
-        }
-
-        // 兼容初始化 SQL 中的明文管理员密码，首次登录成功后立即升级为 BCrypt。
-        if (rawPassword.equals(storedPassword)) {
-            employeeMapper.updatePassword(
-                    employee.getId(),
-                    passwordEncoder.encode(rawPassword)
-            );
-            return true;
-        }
-        return false;
+        return passwordUtil.matches(rawPassword, storedPassword);
     }
 }

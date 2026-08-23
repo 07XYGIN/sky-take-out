@@ -10,6 +10,35 @@ export interface ApiResponse<T = unknown> {
   status?: number
 }
 
+const SUCCESS_CODES = new Set(['1', '200'])
+
+function isApiResponse(body: unknown): body is ApiResponse {
+  return typeof body === 'object' && body !== null && 'code' in body
+}
+
+function clearAuthSession() {
+  removeToken()
+  removeStoredUser()
+  window.dispatchEvent(new Event('sky-auth-expired'))
+}
+
+function toApiError(body: unknown) {
+  if (!isApiResponse(body) || body.code === undefined) {
+    return null
+  }
+
+  const code = String(body.code)
+  if (SUCCESS_CODES.has(code)) {
+    return null
+  }
+
+  if (code === '401') {
+    clearAuthSession()
+  }
+
+  return new Error(body.msg || body.message || '请求失败')
+}
+
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 60_000,
@@ -25,12 +54,17 @@ request.interceptors.request.use((config) => {
 })
 
 request.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const apiError = toApiError(response.data)
+    if (apiError) {
+      return Promise.reject(apiError)
+    }
+    return response
+  },
   (error) => {
-    if (error.response?.status === 401) {
-      removeToken()
-      removeStoredUser()
-      window.dispatchEvent(new Event('sky-auth-expired'))
+    const apiError = toApiError(error.response?.data)
+    if (apiError) {
+      return Promise.reject(apiError)
     }
     return Promise.reject(error)
   },
@@ -41,7 +75,7 @@ export async function requestData<T>(config: AxiosRequestConfig) {
   const body = response.data
   if (body && typeof body === 'object' && 'data' in body && 'code' in body) {
     const envelope = body as ApiResponse<T>
-    if (envelope.code !== undefined && String(envelope.code) !== '1' && String(envelope.code) !== '200') {
+    if (envelope.code !== undefined && !SUCCESS_CODES.has(String(envelope.code))) {
       throw new Error(envelope.msg || envelope.message || '请求失败')
     }
     return envelope.data
