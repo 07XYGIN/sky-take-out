@@ -26,8 +26,11 @@ mybatis:
 
 logging:
   level:
-    com.example.corelearning.mapper: debug
+    com.example.sky.mapper: debug
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:please-change-this-dev-only-secret-key-32chars}
   expire-time: 7200000
+
+snowflake:
+  worker-id: ${SNOWFLAKE_WORKER_ID:1}

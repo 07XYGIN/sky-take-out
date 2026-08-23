@@ -123,14 +123,7 @@ export function RegisterPage() {
                   autoComplete="name"
                 />
               </Form.Item>
-              <Form.Item
-                name="phone"
-                label="手机号"
-                rules={[
-                  { required: true, message: "请输入手机号" },
-                  { pattern: /^1[3-9]\d{9}$/, message: "请输入有效手机号" },
-                ]}
-              >
+              <Form.Item name="phone" label="手机号">
                 <Input
                   prefix={<Phone size={17} />}
                   placeholder="请输入手机号"
@@ -140,7 +133,6 @@ export function RegisterPage() {
               <Form.Item
                 name="sex"
                 label="性别"
-                rules={[{ required: true, message: "请选择性别" }]}
               >
                 <Select
                   placeholder="请选择性别"
@@ -150,17 +142,7 @@ export function RegisterPage() {
                   ]}
                 />
               </Form.Item>
-              <Form.Item
-                name="idNumber"
-                label="身份证号"
-                rules={[
-                  { required: true, message: "请输入身份证号" },
-                  {
-                    pattern: /^(\d{17}[\dXx])$/,
-                    message: "请输入有效的18位身份证号",
-                  },
-                ]}
-              >
+              <Form.Item name="idNumber" label="身份证号">
                 <Input
                   prefix={<CreditCard size={17} />}
                   placeholder="请输入18位身份证号"
@@ -168,14 +150,7 @@ export function RegisterPage() {
                   autoComplete="off"
                 />
               </Form.Item>
-              <Form.Item
-                name="password"
-                label="密码"
-                rules={[
-                  { required: true, message: "请输入密码" },
-                  { min: 6, message: "密码至少 6 位" },
-                ]}
-              >
+              <Form.Item name="password" label="密码">
                 <Input.Password
                   prefix={<LockKeyhole size={17} />}
                   placeholder="请输入登录密码"
