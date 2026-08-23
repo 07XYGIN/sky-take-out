@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format":"npx prettier --write \"src/**/*.tsx\""
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
