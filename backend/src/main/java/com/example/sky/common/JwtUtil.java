@@ -1,4 +1,4 @@
-package com.example.corelearning.common;
+package com.example.sky.common;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

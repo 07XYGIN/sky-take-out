@@ -1,4 +1,4 @@
-package com.example.corelearning.common;
+package com.example.sky.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;

@@ -1,6 +1,6 @@
-package com.example.corelearning.exception;
+package com.example.sky.exception;
 
-import com.example.corelearning.common.Result;
+import com.example.sky.common.Result;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

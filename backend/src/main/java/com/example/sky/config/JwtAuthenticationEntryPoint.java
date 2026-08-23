@@ -1,6 +1,6 @@
-package com.example.corelearning.config;
+package com.example.sky.config;
 
-import com.example.corelearning.common.Result;
+import com.example.sky.common.Result;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.example.corelearning.controller;
+package com.example.sky.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

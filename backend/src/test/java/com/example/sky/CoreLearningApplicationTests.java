@@ -1,4 +1,4 @@
-package com.example.corelearning;
+package com.example.sky;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

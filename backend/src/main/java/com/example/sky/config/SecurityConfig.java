@@ -1,4 +1,4 @@
-package com.example.corelearning.config;
+package com.example.sky.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

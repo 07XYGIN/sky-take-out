@@ -1,4 +1,4 @@
-package com.example.corelearning.common;
+package com.example.sky.common;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;

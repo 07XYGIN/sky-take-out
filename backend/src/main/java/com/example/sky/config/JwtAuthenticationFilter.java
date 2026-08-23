@@ -1,6 +1,6 @@
-package com.example.corelearning.config;
+package com.example.sky.config;
 
-import com.example.corelearning.common.JwtUtil;
+import com.example.sky.common.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

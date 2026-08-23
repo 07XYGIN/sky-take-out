@@ -1,4 +1,4 @@
-package com.example.corelearning.mapper;
+package com.example.sky.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 

@@ -1,4 +1,4 @@
-package com.example.corelearning.exception;
+package com.example.sky.exception;
 
 
 import lombok.Getter;
