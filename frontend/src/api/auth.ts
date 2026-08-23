@@ -10,7 +10,9 @@ export interface RegisterPayload {
   username: string
   password: string
   name: string
-  phone?: string
+  phone: string
+  sex: string
+  idNumber: string
 }
 
 export interface LoginResult {
