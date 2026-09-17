@@ -89,7 +89,7 @@ export function AdminLayout() {
       // The local session is still cleared when the API is unavailable.
     }
     clearSession();
-    navigate("/login", { replace: true });
+    // navigate("/login", { replace: true });
   };
 
   return (
@@ -104,9 +104,9 @@ export function AdminLayout() {
         className={`admin-sider ${mobileOpen ? "admin-sider-mobile-open" : ""}`}
       >
         <div className="flex h-20 items-center gap-3 border-b border-white/10 px-5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-saffron text-sm font-black text-ink">
+          {/* <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-saffron text-sm font-black text-ink">
             天
-          </div>
+          </div> */}
           {!collapsed && (
             <div className="min-w-0 text-white">
               <p className="truncate text-[15px] font-semibold">苍穹外卖</p>

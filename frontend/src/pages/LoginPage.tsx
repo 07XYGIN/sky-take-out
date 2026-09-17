@@ -40,9 +40,9 @@ export function LoginPage() {
       <div className="mx-auto grid min-h-screen max-w-[1440px] lg:grid-cols-[1.05fr_0.95fr]">
         <section className="relative hidden overflow-hidden border-r border-white/10 px-12 py-14 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
           <div className="relative z-10 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-saffron font-black text-ink">
+            {/* <span className="flex h-10 w-10 items-center justify-center rounded-md bg-saffron font-black text-ink">
               天
-            </span>
+            </span> */}
             <span className="text-lg font-semibold tracking-tight">
               苍穹外卖
             </span>
@@ -73,9 +73,9 @@ export function LoginPage() {
           <div className="w-full max-w-[420px]">
             <div className="mb-10 lg:hidden">
               <div className="mb-6 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-saffron font-black text-ink">
+                {/* <span className="flex h-10 w-10 items-center justify-center rounded-md bg-saffron font-black text-ink">
                   天
-                </span>
+                </span> */}
                 <span className="text-lg font-semibold text-ink">苍穹外卖</span>
               </div>
               <p className="text-sm text-slate-500">
