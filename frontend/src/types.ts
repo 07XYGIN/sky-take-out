@@ -98,3 +98,9 @@ export interface SessionUser {
   name?: string
   avatar?: string
 }
+
+
+export interface fallbackTopType{
+  name:string
+  number:number
+}

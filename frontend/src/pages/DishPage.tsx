@@ -29,35 +29,7 @@ import { StatusPill } from "../components/StatusPill";
 import { formatCurrency } from "../lib/format";
 import type { Category, Dish } from "../types";
 
-const fallbackDishes: Dish[] = [
-  {
-    id: 1,
-    name: "招牌卤肉饭",
-    categoryId: 1,
-    categoryName: "主食",
-    price: 28,
-    status: 1,
-    description: "慢火卤香，配温泉蛋和时蔬。",
-  },
-  {
-    id: 2,
-    name: "青花椒鸡腿饭",
-    categoryId: 1,
-    categoryName: "主食",
-    price: 32,
-    status: 1,
-    description: "鲜麻不燥，鸡腿肉嫩。",
-  },
-  {
-    id: 3,
-    name: "芝士薯角",
-    categoryId: 2,
-    categoryName: "小吃",
-    price: 16,
-    status: 0,
-    description: "外酥内松，附芝士蘸酱。",
-  },
-];
+const fallbackDishes: Dish[] = [];
 
 export function DishPage() {
   const [form] = Form.useForm<Partial<Dish>>();

@@ -27,12 +27,7 @@ import { PageHeader } from "../components/PageHeader";
 import { StatusPill } from "../components/StatusPill";
 import type { Category } from "../types";
 
-const fallbackCategories: Category[] = [
-  { id: 1, name: "主食", type: 1, sort: 1, status: 1 },
-  { id: 2, name: "小吃", type: 1, sort: 2, status: 1 },
-  { id: 3, name: "饮品", type: 1, sort: 3, status: 1 },
-  { id: 4, name: "双人套餐", type: 2, sort: 1, status: 1 },
-];
+const fallbackCategories: Category[] = [];
 
 export function CategoryPage() {
   const [form] = Form.useForm<Partial<Category>>();

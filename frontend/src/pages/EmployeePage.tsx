@@ -13,32 +13,7 @@ import { PageHeader } from "../components/PageHeader";
 import { StatusPill } from "../components/StatusPill";
 import type { Employee } from "../types";
 
-const fallbackEmployees: Employee[] = [
-  {
-    id: 1,
-    username: "admin",
-    name: "店长",
-    phone: "138****8001",
-    status: 1,
-    createTime: "2026-08-01 09:20:12",
-  },
-  {
-    id: 2,
-    username: "operator01",
-    name: "李晓晴",
-    phone: "139****6022",
-    status: 1,
-    createTime: "2026-08-04 10:12:48",
-  },
-  {
-    id: 3,
-    username: "operator02",
-    name: "王晨",
-    phone: "136****1988",
-    status: 0,
-    createTime: "2026-08-08 15:43:11",
-  },
-];
+const fallbackEmployees: Employee[] = [];
 
 export function EmployeePage() {
   const [form] = Form.useForm<Partial<Employee> & { password?: string }>();

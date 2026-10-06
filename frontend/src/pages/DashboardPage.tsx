@@ -33,32 +33,7 @@ const fallbackSummary: DashboardData = {
   cancelledOrders: 3,
 };
 
-const fallbackOrders: OrderSummary[] = [
-  {
-    id: 10482,
-    number: "20260821010482",
-    consignee: "林先生",
-    amount: 86,
-    status: 2,
-    orderTime: "2026-08-21 14:25:18",
-  },
-  {
-    id: 10481,
-    number: "20260821010481",
-    consignee: "周女士",
-    amount: 52,
-    status: 3,
-    orderTime: "2026-08-21 14:18:07",
-  },
-  {
-    id: 10480,
-    number: "20260821010480",
-    consignee: "陈同学",
-    amount: 118,
-    status: 4,
-    orderTime: "2026-08-21 14:12:44",
-  },
-];
+const fallbackOrders: OrderSummary[] = [];
 
 const statusMap: Record<string, { label: string; color: string }> = {
   "1": { label: "待接单", color: "gold" },

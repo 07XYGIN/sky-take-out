@@ -29,26 +29,7 @@ import { StatusPill } from "../components/StatusPill";
 import { formatCurrency } from "../lib/format";
 import type { Category, Setmeal } from "../types";
 
-const fallbackSetmeals: Setmeal[] = [
-  {
-    id: 1,
-    name: "双人分享餐",
-    categoryId: 4,
-    categoryName: "双人套餐",
-    price: 68,
-    status: 1,
-    description: "两份主食、两份小吃和两杯饮品。",
-  },
-  {
-    id: 2,
-    name: "午间轻食餐",
-    categoryId: 4,
-    categoryName: "双人套餐",
-    price: 42,
-    status: 1,
-    description: "工作日午间快速解决一餐。",
-  },
-];
+const fallbackSetmeals: Setmeal[] = [];
 
 export function SetmealPage() {
   const [form] = Form.useForm<Partial<Setmeal>>();

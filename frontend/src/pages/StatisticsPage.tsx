@@ -23,7 +23,7 @@ import type {
 import { MetricCard } from "../components/MetricCard";
 import { PageHeader } from "../components/PageHeader";
 import { formatCurrency } from "../lib/format";
-import type { DashboardData } from "../types";
+import type { DashboardData, fallbackTopType } from "../types";
 
 const { RangePicker } = DatePicker;
 
@@ -41,13 +41,7 @@ const fallbackOrderTotal = [154, 168, 132, 201, 182, 194, 186];
 const fallbackOrderValid = [140, 152, 120, 186, 169, 180, 172];
 const fallbackUserTotal = [1320, 1348, 1372, 1408, 1446, 1481, 1518];
 const fallbackUserNew = [28, 24, 36, 38, 35, 37, 42];
-const fallbackTop = [
-  { name: "招牌卤肉饭", number: 86 },
-  { name: "青花椒鸡腿饭", number: 74 },
-  { name: "双人分享餐", number: 62 },
-  { name: "午间轻食餐", number: 48 },
-  { name: "芝士薯角", number: 41 },
-];
+const fallbackTop:fallbackTopType[] = [];
 
 interface ChartSeries {
   dates: string[];
