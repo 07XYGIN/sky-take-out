@@ -397,7 +397,7 @@ export function OrderPage() {
         description="跟踪订单履约状态，处理接单、拒单、派送、完成与取消。"
         actions={
           usingFallback ? (
-            <Tag color="orange">接口未连接 · 展示样例数据</Tag>
+            <Tag color="orange">_</Tag>
           ) : undefined
         }
       />

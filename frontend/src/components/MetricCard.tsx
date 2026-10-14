@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface MetricCardProps {
   label: string;
-  value: string | number;
+  value?: string | number;
   note?: string;
   icon: ReactNode;
   tone?: "saffron" | "teal" | "coral" | "ink";

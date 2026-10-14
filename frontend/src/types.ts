@@ -47,6 +47,7 @@ export interface Dish {
   description?: string
   status: number
   updateTime?: string
+  statusName?:string
 }
 
 export interface Setmeal {
@@ -90,6 +91,9 @@ export interface DashboardData {
   deliveredOrders?: number
   completedOrders?: number
   cancelledOrders?: number
+  amount?:number
+  avgAmount?:number
+  status?:string|number
 }
 
 export interface SessionUser {
@@ -103,4 +107,14 @@ export interface SessionUser {
 export interface fallbackTopType{
   name:string
   number:number
+}
+
+export interface BusinessDataEcharts{
+  day:string
+  turnover:number
+}
+
+export interface ProductOverview{
+  dishes?:number
+  setmeals?:number
 }

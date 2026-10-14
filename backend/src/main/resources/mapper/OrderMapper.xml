@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sky.mapper.OrderMapper">
+
+    <select id="BusinessData" resultType="com.example.sky.vo.BusinessVo">
+        select  SUM(o.amount) amount,
+                COUNT(o.status) status,
+                ROUND(AVG(amount), 2) avgAmount,
+                COUNT(CASE WHEN o.status = 2 THEN 1 END) AS waitingOrders,
+                COUNT(CASE WHEN o.status = 4 THEN 1 END) AS deliveredOrders,
+                COUNT(CASE WHEN o.status = 5 THEN 1 END) AS completedOrders,
+                COUNT(CASE WHEN o.status = 6 THEN 1 END) AS cancelledOrders
+        from orders o WHERE DATE(o.order_time) = CURDATE();
+    </select>
+
+    <select resultType="com.example.sky.vo.BusinessDataVo" id="echartsBusiness">
+        select
+            DATE(order_time) day ,SUM(amount) AS turnover
+        from orders WHERE order_time >= CURDATE() - INTERVAL 6 DAY AND orders.order_time &lt; CURDATE() + INTERVAL 1 DAY GROUP BY DATE(order_time)
+    </select>
+
+    <select resultType="com.example.sky.vo.BusinessWewestVo" id="BusinessWewest">
+        select id,number,amount,order_time,user_name,status
+        from orders o
+        WHERE order_time >= CURDATE() AND order_time &lt; CURDATE() + INTERVAL 1 DAY
+    </select>
+
+    <select id="BusinessState" resultType="com.example.sky.vo.BusinessStateVo">
+        SELECT
+                (SELECT COUNT(*) FROM dish    WHERE status = 1) AS dishes,
+                (SELECT COUNT(*) FROM setmeal WHERE status = 1) AS setmeals;
+    </select>
+</mapper>

@@ -7,118 +7,101 @@ import {
   Clock3,
   ReceiptText,
   TrendingUp,
-  UserRound,
   Utensils,
 } from "lucide-react";
 import {
   getBusinessData,
   getOverviewDishes,
-  getOverviewOrders,
-  getOverviewSetmeals,
+  getBusinessEcharts,
+  getBusinessStatus
 } from "../api/dashboard";
 import { EmptyState } from "../components/EmptyState";
 import { MetricCard } from "../components/MetricCard";
 import { PageHeader } from "../components/PageHeader";
 import { formatCurrency, formatDateTime } from "../lib/format";
-import type { DashboardData, Dish, OrderSummary, Setmeal } from "../types";
+import type { BusinessDataEcharts, DashboardData, Dish, OrderSummary, ProductOverview } from "../types";
 
-const fallbackSummary: DashboardData = {
-  turnover: 12860.5,
-  validOrderCount: 186,
-  unitPrice: 69.14,
-  newUsers: 42,
-  waitingOrders: 8,
-  deliveredOrders: 12,
-  completedOrders: 166,
-  cancelledOrders: 3,
-};
+const fallbackSummary: DashboardData = {};
 
-const fallbackOrders: OrderSummary[] = [];
-
+const stateResult:ProductOverview = {}
 const statusMap: Record<string, { label: string; color: string }> = {
-  "1": { label: "待接单", color: "gold" },
-  "2": { label: "制作中", color: "blue" },
-  "3": { label: "配送中", color: "cyan" },
-  "4": { label: "已完成", color: "green" },
+  2: { label: "待接单", color: "gold" },
+  3: { label: "已接单", color: "blue" },
+  4: { label: "配送中", color: "cyan" },
+  5: { label: "已完成", color: "green" },
 };
 
 export function DashboardPage() {
   const [summary, setSummary] = useState(fallbackSummary);
-  const [orders, setOrders] = useState<OrderSummary[]>(fallbackOrders);
   const [dishes, setDishes] = useState<Dish[]>([]);
-  const [setmeals, setSetmeals] = useState<Setmeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
-
+  const [echarts,setEcharts] = useState<BusinessDataEcharts[]>()
+  const [state,setState] = useState<ProductOverview>()
   useEffect(() => {
     let active = true;
     Promise.allSettled([
       getBusinessData(),
-      getOverviewOrders(),
       getOverviewDishes(),
-      getOverviewSetmeals(),
+      getBusinessEcharts(),
+      getBusinessStatus()
     ]).then((results) => {
       if (!active) return;
-      const [summaryResult, ordersResult, dishesResult, setmealResult] =
+      const [summaryResult, dishesResult,echarts,states] =
         results;
       let hasFailure = false;
       if (summaryResult.status === "fulfilled" && summaryResult.value)
-        setSummary({ ...fallbackSummary, ...summaryResult.value });
-      else hasFailure = true;
-      if (
-        ordersResult.status === "fulfilled" &&
-        Array.isArray(ordersResult.value)
-      )
-        setOrders(ordersResult.value);
+        setSummary({ ...fallbackSummary, ...summaryResult.value });        
       else hasFailure = true;
       if (
         dishesResult.status === "fulfilled" &&
         Array.isArray(dishesResult.value)
       )
-        setDishes(dishesResult.value);
-      if (
-        setmealResult.status === "fulfilled" &&
-        Array.isArray(setmealResult.value)
-      )
-        setSetmeals(setmealResult.value);
+        setDishes(dishesResult.value); 
+        else hasFailure = true;
+      if (echarts.status ==="fulfilled" && Array.isArray(echarts.value))
+        setEcharts(echarts.value)
+      else hasFailure = true;
+      if(states.status ==="fulfilled" && states.value)
+        setState({...stateResult,...states.value})
+      else hasFailure = true;
       setUsingFallback(hasFailure);
-      setLoading(false);
+      setLoading(false);      
     });
     return () => {
       active = false;
     };
   }, []);
-
-  const salesOption = useMemo(
-    () => ({
-      color: ["#2e8780", "#e9a92f"],
-      tooltip: { trigger: "axis" },
-      grid: { left: 8, right: 8, top: 18, bottom: 8, containLabel: true },
-      xAxis: {
-        type: "category",
-        data: ["08/15", "08/16", "08/17", "08/18", "08/19", "08/20", "08/21"],
-        axisLine: { lineStyle: { color: "#dce2e1" } },
-        axisLabel: { color: "#8b9799" },
+const salesOption = useMemo(
+  () => ({
+    color: ["#2e8780", "#e9a92f"],
+    tooltip: { trigger: "axis" },
+    grid: { left: 8, right: 8, top: 18, bottom: 8, containLabel: true },
+    xAxis: {
+      type: "category",
+      data: echarts?.map(i=>i.day)||[],
+      axisLine: { lineStyle: { color: "#dce2e1" } },
+      axisLabel: { color: "#8b9799" },
+    },
+    yAxis: {
+      type: "value",
+      splitLine: { lineStyle: { color: "#edf0ef" } },
+      axisLabel: { color: "#8b9799" },
+    },
+    series: [
+      {
+        name: "营业额",
+        type: "bar",
+        barWidth: 18,
+        data:echarts?.map(i=>i.turnover) || [],
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
       },
-      yAxis: {
-        type: "value",
-        splitLine: { lineStyle: { color: "#edf0ef" } },
-        axisLabel: { color: "#8b9799" },
-      },
-      series: [
-        {
-          name: "营业额",
-          type: "bar",
-          barWidth: 18,
-          data: [10200, 11840, 9650, 14100, 12700, 13580, summary.turnover],
-          itemStyle: { borderRadius: [4, 4, 0, 0] },
-        },
-      ],
-    }),
-    [summary.turnover],
-  );
+    ],
+  }),
+  [echarts],
+);
 
-  const orderColumns: TableColumnsType<OrderSummary> = [
+  const orderColumns: TableColumnsType<any> = [
     {
       title: "订单号",
       dataIndex: "number",
@@ -129,8 +112,8 @@ export function DashboardPage() {
     },
     {
       title: "顾客",
-      dataIndex: "consignee",
-      key: "consignee",
+      dataIndex: "userName",
+      key: "userName",
       render: (value) => value || "--",
     },
     {
@@ -145,7 +128,7 @@ export function DashboardPage() {
       title: "状态",
       dataIndex: "status",
       key: "status",
-      render: (value, record) => (
+      render: (value, record:any) => (
         <Tag color={statusMap[String(value)]?.color || "default"}>
           {record.statusName ||
             statusMap[String(value)]?.label ||
@@ -171,7 +154,7 @@ export function DashboardPage() {
         description="看清门店今天的节奏，把精力留给真正需要处理的订单。"
         actions={
           usingFallback ? (
-            <Tag color="orange">接口未连接 · 展示样例数据</Tag>
+            <Tag color="orange">_</Tag>
           ) : undefined
         }
       />
@@ -186,7 +169,7 @@ export function DashboardPage() {
             <Col xs={24} sm={12} xl={6}>
               <MetricCard
                 label="今日营业额"
-                value={formatCurrency(summary.turnover)}
+                value={formatCurrency(summary.amount)}
                 note="较昨日实时汇总"
                 icon={<TrendingUp size={18} />}
                 tone="saffron"
@@ -195,7 +178,7 @@ export function DashboardPage() {
             <Col xs={24} sm={12} xl={6}>
               <MetricCard
                 label="有效订单"
-                value={summary.validOrderCount ?? 0}
+                value={summary?.status}
                 note="已完成及配送中订单"
                 icon={<ReceiptText size={18} />}
                 tone="teal"
@@ -204,19 +187,10 @@ export function DashboardPage() {
             <Col xs={24} sm={12} xl={6}>
               <MetricCard
                 label="平均客单价"
-                value={formatCurrency(summary.unitPrice)}
+                value={formatCurrency(summary.avgAmount)}
                 note="按有效订单计算"
                 icon={<Utensils size={18} />}
                 tone="coral"
-              />
-            </Col>
-            <Col xs={24} sm={12} xl={6}>
-              <MetricCard
-                label="新增用户"
-                value={summary.newUsers ?? 0}
-                note="今日首次下单用户"
-                icon={<UserRound size={18} />}
-                tone="ink"
               />
             </Col>
           </Row>
@@ -267,10 +241,10 @@ export function DashboardPage() {
                 extra={<span className="text-xs text-slate-400">实时队列</span>}
               >
                 <Table
-                  rowKey="id"
+                  rowKey="Id"
                   size="middle"
                   columns={orderColumns}
-                  dataSource={orders}
+                  dataSource={dishes}
                   pagination={false}
                   locale={{ emptyText: <EmptyState /> }}
                   scroll={{ x: 660 }}
@@ -286,13 +260,13 @@ export function DashboardPage() {
                   <div className="rounded-md bg-[#f4f7f6] p-4">
                     <p className="text-xs text-slate-500">在售菜品</p>
                     <p className="mt-2 text-2xl font-semibold text-ink">
-                      {dishes.length || 28}
+                      {state?.dishes}
                     </p>
                   </div>
                   <div className="rounded-md bg-[#fff7e7] p-4">
                     <p className="text-xs text-slate-500">在售套餐</p>
                     <p className="mt-2 text-2xl font-semibold text-ink">
-                      {setmeals.length || 6}
+                      {state?.setmeals}
                     </p>
                   </div>
                 </div>

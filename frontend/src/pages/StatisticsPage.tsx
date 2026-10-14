@@ -395,7 +395,7 @@ export function StatisticsPage() {
         description="查看营业额、用户增长、订单转化和热销商品。"
         actions={
           usingFallback ? (
-            <Tag color="orange">接口未连接 · 展示样例数据</Tag>
+            <Tag color="orange">_</Tag>
           ) : undefined
         }
       />
