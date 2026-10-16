@@ -1,16 +1,15 @@
 package com.example.sky.controller;
 
 import com.example.sky.common.Result;
+import com.example.sky.dto.DataStatisticsDto;
 import com.example.sky.service.OrderService;
-import com.example.sky.vo.BusinessDataVo;
-import com.example.sky.vo.BusinessStateVo;
-import com.example.sky.vo.BusinessVo;
-import com.example.sky.vo.BusinessWewestVo;
+import com.example.sky.vo.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
 
+@Log4j2
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/workspace")
@@ -32,4 +31,12 @@ public class OrderController {
 
     @GetMapping("/businessStatus")
     public Result<BusinessStateVo> BussinessStatus() {return Result.success(orderService.BusinessStateService());}
+
+    @GetMapping("/report/turnoverStatistics")
+    public Result<dataStatisticsVo[]> ReportTurnoverStatistics(
+            @RequestParam("beginTime") @DateTimeFormat(pattern = "yyyy-MM-dd") String beginTime,
+            @RequestParam("endTime") @DateTimeFormat(pattern = "yyyy-MM-dd") String endTime) {
+        log.info("beginTime={}, endTime={}", beginTime, endTime);
+        return Result.success(orderService.dataStatisticsService(beginTime, endTime));
+    }
 }

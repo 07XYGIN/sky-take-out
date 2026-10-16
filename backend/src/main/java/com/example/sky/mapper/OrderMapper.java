@@ -1,10 +1,8 @@
 package com.example.sky.mapper;
 
-import com.example.sky.vo.BusinessDataVo;
-import com.example.sky.vo.BusinessStateVo;
-import com.example.sky.vo.BusinessVo;
-import com.example.sky.vo.BusinessWewestVo;
+import com.example.sky.vo.*;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface OrderMapper {
@@ -12,4 +10,5 @@ public interface OrderMapper {
     BusinessDataVo[] echartsBusiness();
     BusinessWewestVo[] BusinessWewest();
     BusinessStateVo BusinessState();
+    dataStatisticsVo[] dataStatistics(@Param("beginTime") String beginTime , @Param("endTime") String endTime);
 }

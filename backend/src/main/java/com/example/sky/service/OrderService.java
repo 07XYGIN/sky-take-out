@@ -1,10 +1,8 @@
 package com.example.sky.service;
 
+import com.example.sky.dto.DataStatisticsDto;
 import com.example.sky.mapper.OrderMapper;
-import com.example.sky.vo.BusinessDataVo;
-import com.example.sky.vo.BusinessStateVo;
-import com.example.sky.vo.BusinessVo;
-import com.example.sky.vo.BusinessWewestVo;
+import com.example.sky.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,4 +21,7 @@ public class OrderService {
     }
     public BusinessWewestVo[] BusinessWewestService() {return orderMapper.BusinessWewest();}
     public BusinessStateVo BusinessStateService() {return orderMapper.BusinessState();}
+    public dataStatisticsVo[] dataStatisticsService(String beginTime, String endTime) {
+        return orderMapper.dataStatistics(beginTime, endTime);
+    }
 }

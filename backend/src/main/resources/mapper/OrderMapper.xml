@@ -31,4 +31,16 @@
                 (SELECT COUNT(*) FROM dish    WHERE status = 1) AS dishes,
                 (SELECT COUNT(*) FROM setmeal WHERE status = 1) AS setmeals;
     </select>
+
+    <select id="dataStatistics" resultType="com.example.sky.vo.dataStatisticsVo">
+        SELECT
+        DATE(o.order_time) AS day,
+        SUM(o.amount) AS amount,
+        SUM(o.status IN (2, 3, 4, 5)) AS valid,
+        SUM(o.status NOT IN (6, 7)) AS total
+        FROM orders o
+        WHERE o.order_time >= #{beginTime}
+        AND o.order_time &lt;  #{endTime}
+        GROUP BY DATE(o.order_time);
+    </select>
 </mapper>

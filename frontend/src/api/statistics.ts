@@ -8,6 +8,11 @@ export interface StatisticsPoint {
   unitPrice?: number
   newUsers?: number
   totalUsers?: number
+  day:string
+  amount:number
+  number:number
+  valid:number
+  total:number
 }
 
 export interface SeriesStatistics {
@@ -28,17 +33,6 @@ export interface TopStatistics {
 }
 
 export function getTurnoverStatistics(params: Record<string, unknown>) {
-  return requestData<SeriesStatistics | StatisticsPoint[]>({ method: 'get', url: '/report/turnoverStatistics', params })
+  return requestData<StatisticsPoint[]>({ method: 'get', url: '/workspace/report/turnoverStatistics', params })
 }
 
-export function getUserStatistics(params: Record<string, unknown>) {
-  return requestData<SeriesStatistics | StatisticsPoint[]>({ method: 'get', url: '/report/userStatistics', params })
-}
-
-export function getOrderStatistics(params: Record<string, unknown>) {
-  return requestData<SeriesStatistics | StatisticsPoint[]>({ method: 'get', url: '/report/ordersStatistics', params })
-}
-
-export function getTopStatistics(params: Record<string, unknown>) {
-  return requestData<TopStatistics | Array<{ name: string; number: number }>>({ method: 'get', url: '/report/top10', params })
-}

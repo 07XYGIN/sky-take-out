@@ -91,9 +91,10 @@ export interface DashboardData {
   deliveredOrders?: number
   completedOrders?: number
   cancelledOrders?: number
-  amount?:number
+  amount:number
   avgAmount?:number
-  status?:string|number
+  status:number
+  valid:number
 }
 
 export interface SessionUser {
