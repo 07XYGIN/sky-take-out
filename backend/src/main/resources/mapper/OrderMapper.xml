@@ -43,4 +43,28 @@
         AND o.order_time &lt;  #{endTime}
         GROUP BY DATE(o.order_time);
     </select>
+
+    <select id="SelectOrderList" resultType="com.example.sky.vo.OrderVo">
+        select
+            o.number, o.status, o.user_name as consignee, o.phone, o.address,
+            o.amount, o.order_time, o.remark,
+            od.dish_id, od.number as quantity, d.name as dish_name
+        from orders o
+                 left join order_detail od on od.number = o.number
+                 left join dish d on d.id = od.dish_id
+        <where>
+            <if test="number != null and number!=''">
+                AND o.number = #{number}
+            </if>
+            <if test="phone != null and phone != ''">
+                AND o.phone = #{phone}
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                AND o.order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND o.order_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
 </mapper>
