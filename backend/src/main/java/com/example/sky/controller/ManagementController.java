@@ -5,6 +5,7 @@ import com.example.sky.common.Result;
 import com.example.sky.dto.OrderDto;
 import com.example.sky.service.OrderService;
 import com.example.sky.vo.OrderVo;
+import com.example.sky.vo.conditionSearchTabVo;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,5 +25,10 @@ public class ManagementController {
         PageInfo<OrderVo> pageInfo = orderServices.OrderService(order);
         PageResult<OrderVo> pageResult = PageResult.of(pageInfo);
         return Result.success(pageResult);
+    };
+
+    @GetMapping("/statistics")
+    public Result<conditionSearchTabVo> GetManagementTab(){
+        return Result.success(orderServices.conditionSearchTabService());
     }
 }

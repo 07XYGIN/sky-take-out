@@ -1,4 +1,5 @@
 export interface PageResult<T> {
+  list: never[]
   records: T[]
   total: number
   page?: number
@@ -80,6 +81,7 @@ export interface OrderSummary {
   amount?: number
   status?: number | string
   statusName?: string
+  list?:Array<any>
 }
 
 export interface DashboardData {

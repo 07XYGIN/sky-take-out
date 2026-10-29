@@ -65,6 +65,20 @@
             <if test="endTime != null and endTime != ''">
                 AND o.order_time &lt;= #{endTime}
             </if>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
         </where>
+    </select>
+
+    <select id="conditionSearchTab" resultType="com.example.sky.vo.conditionSearchTabVo">
+        SELECT
+            COUNT(*)          AS allOrders,
+            SUM(status = 1)   AS waiting,
+            SUM(status = 3)   AS confirmed,
+            SUM(status = 4)   AS delivering,
+            SUM(status = 5)   AS completed,
+            SUM(status = 6)   AS cancelled
+        FROM orders;
     </select>
 </mapper>

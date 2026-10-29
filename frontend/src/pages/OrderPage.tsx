@@ -15,7 +15,7 @@ import {
   Tooltip,
   message,
 } from "antd";
-import type { TableColumnsType } from "antd";
+import type { TableColumnsType, TablePaginationConfig } from "antd";
 import { Ban, Check, Eye, PackageCheck, Search, Truck } from "lucide-react";
 import {
   acceptOrder,
@@ -93,16 +93,27 @@ export function OrderPage() {
   const [loading, setLoading] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
   const [statusCounts, setStatusCounts] = useState({
+    AllOrders: 0,
     waiting: 0,
     confirmed: 0,
     delivering: 0,
+    completed: 0,
+    cancelled: 0,
   });
 
-  const loadData = async (status = activeStatus) => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  const loadData = async (
+    status = activeStatus,
+    currentPage = page,
+    currentSize = pageSize,
+  ) => {
     setLoading(true);
     try {
       const result = await getOrderPage(
-        toPageParams(1, 100, {
+        toPageParams(currentPage, currentSize, {
           number: query.number || undefined,
           phone: query.phone || undefined,
           beginTime: query.beginTime,
@@ -110,52 +121,45 @@ export function OrderPage() {
           status: status || undefined,
         }),
       );
-      setRows(result.records || []);
-      setUsingFallback(false);
-      const statistics = await getOrderStatusStatistics().catch(
-        () => undefined,
+
+      setRows(result.list || []);
+      setTotal(
+        typeof result.total === "number" ? result.total : (result.list || []).length,
       );
+      setUsingFallback(false);
+
+      const statistics = await getOrderStatusStatistics().catch(() => undefined);
       if (statistics) {
         setStatusCounts({
-          waiting: statistics.toBeConfirmed || 0,
+          AllOrders: statistics.allOrders || 0,
+          waiting: statistics.waiting || 0,
           confirmed: statistics.confirmed || 0,
-          delivering: statistics.deliveryInProgress || 0,
+          delivering: statistics.delivering || 0,
+          completed: statistics.completed || 0,
+          cancelled: statistics.cancelled || 0,
         });
       }
     } catch {
       setUsingFallback(true);
-      const localRows = fallbackOrders
-        .filter((order) => !status || Number(order.status) === status)
-        .filter(
-          (order) => !query.number || order.number?.includes(query.number),
-        )
-        .filter((order) => !query.phone || order.phone?.includes(query.phone));
-      setRows(localRows);
-      setStatusCounts({
-        waiting: fallbackOrders.filter((order) => Number(order.status) === 2)
-          .length,
-        confirmed: fallbackOrders.filter((order) => Number(order.status) === 3)
-          .length,
-        delivering: fallbackOrders.filter((order) => Number(order.status) === 4)
-          .length,
-      });
+      setRows([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void loadData(0);
+    void loadData(0, 1, pageSize);
   }, []);
 
   const tabs = useMemo(
     () => [
-      { key: "0", label: "全部订单" },
-      { key: "2", label: `待接单 ${statusCounts.waiting}` },
-      { key: "3", label: `待派送 ${statusCounts.confirmed}` },
-      { key: "4", label: `派送中 ${statusCounts.delivering}` },
-      { key: "5", label: "已完成" },
-      { key: "6", label: "已取消" },
+      { key: "0", label: `全部订单: ${statusCounts.AllOrders}` },
+      { key: "1", label: `待付款 : ${statusCounts.waiting}` },
+      { key: "2", label: `待接单 : ${statusCounts.confirmed}` },
+      { key: "3", label: `待派送 : ${statusCounts.delivering}` },
+      { key: "4", label: `派送中 : ${statusCounts.completed}` },
+      { key: "5", label: `已完成 : ${statusCounts.cancelled}` },
     ],
     [statusCounts],
   );
@@ -178,23 +182,7 @@ export function OrderPage() {
   const runOrderAction = async (
     order: OrderSummary,
     action: "accept" | "deliver" | "complete",
-  ) => {
-    const status = Number(order.status);
-    try {
-      if (action === "accept") await acceptOrder(order.id);
-      if (action === "deliver") await deliverOrder(order.id);
-      if (action === "complete") await completeOrder(order.id);
-      message.success(`${nextStatusText(status)}成功`);
-    } catch {
-      message.warning("后端接口暂未可用，已在本地预览状态变更");
-    }
-    if (action === "accept") patchOrderStatus(order.id, 3);
-    if (action === "deliver") patchOrderStatus(order.id, 4);
-    if (action === "complete")
-      patchOrderStatus(order.id, 5, {
-        deliveryTime: new Date().toLocaleString("zh-CN", { hour12: false }),
-      });
-  };
+  ) => {};
 
   const openDetail = async (record: OrderSummary) => {
     setSelected(record);
@@ -390,16 +378,20 @@ export function OrderPage() {
     },
   ];
 
+  const handleTableChange = (pagination: TablePaginationConfig) => {
+    const nextPage = pagination.current || 1;
+    const nextSize = pagination.pageSize || 10;
+    setPage(nextPage);
+    setPageSize(nextSize);
+    void loadData(activeStatus, nextPage, nextSize);
+  };
+
   return (
     <div>
       <PageHeader
         title="订单管理"
         description="跟踪订单履约状态，处理接单、拒单、派送、完成与取消。"
-        actions={
-          usingFallback ? (
-            <Tag color="orange">_</Tag>
-          ) : undefined
-        }
+        actions={usingFallback ? <Tag color="orange">离线预览</Tag> : undefined}
       />
       <Card className="mb-4">
         <div className="flex flex-wrap items-end gap-3">
@@ -446,7 +438,14 @@ export function OrderPage() {
               }
             />
           </div>
-          <Button onClick={() => void loadData(activeStatus)}>查询</Button>
+          <Button
+            onClick={() => {
+              setPage(1);
+              void loadData(activeStatus, 1, pageSize);
+            }}
+          >
+            查询
+          </Button>
         </div>
       </Card>
       <Card bodyStyle={{ padding: 0 }}>
@@ -457,7 +456,8 @@ export function OrderPage() {
             onChange={(key) => {
               const next = Number(key);
               setActiveStatus(next);
-              void loadData(next);
+              setPage(1);
+              void loadData(next, 1, pageSize);
             }}
           />
         </div>
@@ -467,7 +467,15 @@ export function OrderPage() {
           columns={columns}
           dataSource={rows}
           locale={{ emptyText: <EmptyState label="暂无订单记录" /> }}
-          pagination={{ pageSize: 10, showSizeChanger: false }}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50, 100],
+            showTotal: (t) => `共 ${t} 条`,
+          }}
+          onChange={handleTableChange}
           scroll={{ x: 1420 }}
         />
       </Card>

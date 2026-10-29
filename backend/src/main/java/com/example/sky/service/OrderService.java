@@ -36,4 +36,8 @@ public class OrderService {
         List<OrderVo> orderList = orderMapper.SelectOrderList(order);
         return new PageInfo<>(orderList);
     }
+
+    public conditionSearchTabVo conditionSearchTabService(){
+        return orderMapper.conditionSearchTab();
+    }
 }

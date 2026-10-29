@@ -15,4 +15,5 @@ public interface OrderMapper {
     BusinessStateVo BusinessState();
     dataStatisticsVo[] dataStatistics(@Param("beginTime") String beginTime , @Param("endTime") String endTime);
     List<OrderVo> SelectOrderList(OrderDto orderDto);
+    conditionSearchTabVo conditionSearchTab();
 }

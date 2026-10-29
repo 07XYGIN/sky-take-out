@@ -6,12 +6,13 @@ import lombok.Data;
 @Builder
 @Data
 public class OrderDto {
-    private Integer  number;
-    private String  phone;
-    private String beginTime;
-    private String endTime;
     @Builder.Default
     private Integer page = 1;
     @Builder.Default
     private Integer pageSize = 10;
+    private String  number;
+    private String  phone;
+    private String beginTime;
+    private String endTime;
+    private String status;
 }

@@ -2,9 +2,12 @@ import { requestData } from '../lib/http'
 import type { OrderSummary, PageResult } from '../types'
 
 export interface OrderStatusStatistics {
-  toBeConfirmed?: number
-  confirmed?: number
-  deliveryInProgress?: number
+  allOrders?:number,
+  waiting?: number,
+  confirmed?: number,
+  delivering?: number,
+  completed?:number,
+  cancelled?:number
 }
 
 export function getOrderPage(params: Record<string, unknown>) {
