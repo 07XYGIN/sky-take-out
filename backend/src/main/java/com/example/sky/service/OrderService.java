@@ -40,4 +40,8 @@ public class OrderService {
     public conditionSearchTabVo conditionSearchTabService(){
         return orderMapper.conditionSearchTab();
     }
+
+    public int cancelOrderService(String id,String cancelReason) {
+        return orderMapper.cancelOrder(cancelReason,id);
+    }
 }

@@ -39,4 +39,5 @@ public class OrderController {
         log.info("beginTime={}, endTime={}", beginTime, endTime);
         return Result.success(orderService.dataStatisticsService(beginTime, endTime));
     }
+
 }

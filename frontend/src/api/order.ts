@@ -26,7 +26,7 @@ export function rejectOrder(id: number | string, cancelReason: string) {
   return requestData<unknown>({ method: 'put', url: '/order/rejection', data: { id, rejectionReason: cancelReason } })
 }
 
-export function cancelOrder(id: number | string, cancelReason: string) {
+export function cancelOrder(id: string, cancelReason: string) {
   return requestData<unknown>({ method: 'put', url: '/order/cancel', data: { id, cancelReason } })
 }
 

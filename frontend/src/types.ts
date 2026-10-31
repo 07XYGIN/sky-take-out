@@ -65,7 +65,7 @@ export interface Setmeal {
 
 export interface OrderSummary {
   id: number | string
-  number?: string
+  number: string
   orderTime?: string
   consignee?: string
   phone?: string

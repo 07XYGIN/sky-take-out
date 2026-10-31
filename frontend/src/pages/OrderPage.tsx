@@ -37,7 +37,7 @@ const { RangePicker } = DatePicker;
 const statusMeta: Record<string, { label: string; color: string }> = {
   "1": { label: "待付款", color: "default" },
   "2": { label: "待接单", color: "gold" },
-  "3": { label: "待派送", color: "blue" },
+  "3": { label: "已接单", color: "blue" },
   "4": { label: "派送中", color: "cyan" },
   "5": { label: "已完成", color: "green" },
   "6": { label: "已取消", color: "red" },
@@ -62,6 +62,7 @@ interface QueryState {
 interface ReasonFormValues {
   reason: string;
   customReason?: string;
+  number:string
 }
 
 function getStatusLabel(status: OrderSummary["status"]) {
@@ -157,27 +158,12 @@ export function OrderPage() {
       { key: "0", label: `全部订单: ${statusCounts.AllOrders}` },
       { key: "1", label: `待付款 : ${statusCounts.waiting}` },
       { key: "2", label: `待接单 : ${statusCounts.confirmed}` },
-      { key: "3", label: `待派送 : ${statusCounts.delivering}` },
+      { key: "3", label: `已接单 : ${statusCounts.delivering}` },
       { key: "4", label: `派送中 : ${statusCounts.completed}` },
       { key: "5", label: `已完成 : ${statusCounts.cancelled}` },
     ],
     [statusCounts],
   );
-
-  const patchOrderStatus = (
-    id: OrderSummary["id"],
-    status: number,
-    extra?: Partial<OrderSummary>,
-  ) => {
-    setRows((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, status, ...extra } : item,
-      ),
-    );
-    setSelected((current) =>
-      current?.id === id ? { ...current, status, ...extra } : current,
-    );
-  };
 
   const runOrderAction = async (
     order: OrderSummary,
@@ -195,11 +181,12 @@ export function OrderPage() {
     }
   };
 
-  const openReasonModal = (type: "reject" | "cancel", order: OrderSummary) => {
+  const openReasonModal = (type: "reject" | "cancel", order: OrderSummary) => {    
     setReasonTarget({ type, order });
     reasonForm.setFieldsValue({
       reason: type === "reject" ? rejectReasons[0] : cancelReasons[0],
       customReason: "",
+      number:order.number
     });
   };
 
@@ -212,18 +199,14 @@ export function OrderPage() {
     try {
       if (reasonTarget.type === "reject")
         await rejectOrder(reasonTarget.order.id, reason);
-      else await cancelOrder(reasonTarget.order.id, reason);
+      else await cancelOrder(reasonTarget.order.number, reason);
       message.success(
         reasonTarget.type === "reject" ? "订单已拒绝" : "订单已取消",
       );
-    } catch {
-      message.warning("后端接口暂未可用，已在本地预览状态变更");
+    } finally{
+      loadData()
+      setActiveStatus(0)
     }
-    patchOrderStatus(reasonTarget.order.id, 6, {
-      cancelReason: reason,
-      rejectionReason: reasonTarget.type === "reject" ? reason : undefined,
-      cancelTime: new Date().toLocaleString("zh-CN", { hour12: false }),
-    });
     setReasonTarget(null);
   };
 
