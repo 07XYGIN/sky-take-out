@@ -6,6 +6,7 @@ import com.example.sky.dto.CancelOrder;
 import com.example.sky.dto.OrderDto;
 import com.example.sky.exception.BusinessException;
 import com.example.sky.service.OrderService;
+import com.example.sky.vo.OrderDetailVO;
 import com.example.sky.vo.OrderVo;
 import com.example.sky.vo.conditionSearchTabVo;
 import com.github.pagehelper.PageInfo;
@@ -42,4 +43,10 @@ public class ManagementController {
         }
        return Result.ok();
     }
+
+    @GetMapping("/details/{orderId}")
+    public Result<OrderDetailVO> orderDetail(@PathVariable String orderId){
+        return Result.success(orderServices.orderDetailService(orderId));
+    }
+
 }

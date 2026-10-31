@@ -48,10 +48,9 @@
         select
             o.number, o.status, o.user_name as consignee, o.phone, o.address,
             o.amount, o.order_time, o.remark,
-            od.dish_id, od.number as quantity, d.name as dish_name
+            od.dish_id, od.number as quantity, od.name as orderDishes
         from orders o
-                 left join order_detail od on od.number = o.number
-                 left join dish d on d.id = od.dish_id
+        left join order_detail od on od.order_id = o.id
         <where>
             <if test="number != null and number!=''">
                 AND o.number = #{number}
@@ -88,4 +87,22 @@
         SET status = 6, cancel_reason = #{cancelReason} , cancel_time = NOW()
         WHERE o.number = #{number};
     </update>
+
+    <select id="orderDetail" resultType="com.example.sky.vo.OrderDetailVO">
+        select
+            o.number orderId,
+            o.status orderStatus,
+            o.user_name userName,
+            o.phone AS phone,
+            o.address AS address,
+            o.amount AS amount,
+            o.tableware_number AS tablewareNumber,
+            o.order_time AS orderTime,
+            o.estimated_delivery_time AS estimatedDeliveryTime,
+            o.cancel_reason AS cancelReason,
+            od.name AS orderDishes,
+            od.dish_flavor AS remark
+        from orders o left join order_detail od on o.id = od.order_id
+        where o.number = #{orderId}
+    </select>
 </mapper>

@@ -165,16 +165,11 @@ export function OrderPage() {
     [statusCounts],
   );
 
-  const runOrderAction = async (
-    order: OrderSummary,
-    action: "accept" | "deliver" | "complete",
-  ) => {};
-
   const openDetail = async (record: OrderSummary) => {
     setSelected(record);
     setDetailOpen(true);
     try {
-      const detail = await getOrder(record.id);
+      const detail = await getOrder(record.number);
       setSelected({ ...record, ...detail });
     } catch {
       setSelected(record);
@@ -337,7 +332,7 @@ export function OrderPage() {
               />
             </Tooltip>
           )}
-          {[1, 3, 4, 5].includes(Number(record.status)) && (
+          {[1, 3, 4].includes(Number(record.status)) && (
             <Tooltip title="取消">
               <Button
                 danger

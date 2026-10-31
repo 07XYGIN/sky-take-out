@@ -44,4 +44,8 @@ public class OrderService {
     public int cancelOrderService(String id,String cancelReason) {
         return orderMapper.cancelOrder(cancelReason,id);
     }
+
+    public OrderDetailVO orderDetailService(String orderId){
+        return orderMapper.orderDetail(orderId);
+    }
 }

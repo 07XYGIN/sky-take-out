@@ -17,4 +17,5 @@ public interface OrderMapper {
     List<OrderVo> SelectOrderList(OrderDto orderDto);
     conditionSearchTabVo conditionSearchTab();
     int cancelOrder(@Param("cancelReason") String cancelReason , @Param("number") String number);
+    OrderDetailVO orderDetail(@Param("orderId") String orderId);
 }

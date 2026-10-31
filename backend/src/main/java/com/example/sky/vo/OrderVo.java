@@ -33,4 +33,5 @@ public class OrderVo {
     private String rejectionReason;
 
     private String remark;
+
 }
