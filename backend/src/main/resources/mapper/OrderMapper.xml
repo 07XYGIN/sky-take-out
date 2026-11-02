@@ -82,10 +82,19 @@
 
     </select>
 
-    <update id="cancelOrder">
-        UPDATE orders o
-        SET status = 6, cancel_reason = #{cancelReason} , cancel_time = NOW()
-        WHERE o.number = #{number};
+    <update id="updateOrderStatus">
+        UPDATE orders
+        <set>
+            status = #{status},
+            <if test="status == 6">
+                cancel_reason = #{cancelReason},
+                cancel_time = NOW(),
+            </if>
+            <if test="status == 5">
+                delivery_time = NOW(),
+            </if>
+        </set>
+        WHERE number = #{number}
     </update>
 
     <select id="orderDetail" resultType="com.example.sky.vo.OrderDetailVO">

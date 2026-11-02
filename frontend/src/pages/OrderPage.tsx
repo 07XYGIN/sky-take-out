@@ -185,6 +185,22 @@ export function OrderPage() {
     });
   };
 
+  const runOrderAction = async (
+    record: OrderSummary,
+    action: "accept" | "deliver" | "complete",
+  ) => {
+    try {
+      if (action === "accept") await acceptOrder(record.number);
+      else if (action === "deliver") await deliverOrder(record.number);
+      else await completeOrder(record.number);
+      message.success(`订单已${nextStatusText(Number(record.status))}`);
+      await loadData(0,1,10);
+      setActiveStatus(0)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "订单操作失败");
+    }
+  };
+
   const submitReason = async (values: ReasonFormValues) => {
     if (!reasonTarget) return;
     const reason =
@@ -193,13 +209,13 @@ export function OrderPage() {
         : values.reason;
     try {
       if (reasonTarget.type === "reject")
-        await rejectOrder(reasonTarget.order.id, reason);
+        await rejectOrder(reasonTarget.order.number, reason);
       else await cancelOrder(reasonTarget.order.number, reason);
       message.success(
         reasonTarget.type === "reject" ? "订单已拒绝" : "订单已取消",
       );
     } finally{
-      loadData()
+      loadData(0,1,10)
       setActiveStatus(0)
     }
     setReasonTarget(null);
@@ -434,7 +450,7 @@ export function OrderPage() {
             onChange={(key) => {
               const next = Number(key);
               setActiveStatus(next);
-              setPage(1);
+              setPage(next);
               void loadData(next, 1, pageSize);
             }}
           />

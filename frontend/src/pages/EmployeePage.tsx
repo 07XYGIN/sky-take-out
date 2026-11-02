@@ -139,16 +139,13 @@ export function EmployeePage() {
       <PageHeader
         title="员工管理"
         description="维护门店员工账号、联系方式和可用状态。"
-        actions={
-          <Button
+      />
+      <Button
             type="primary"
             icon={<Plus size={16} />}
             onClick={() => openModal()}
-          >
-            新增员工
-          </Button>
-        }
-      />
+            className="my-5"
+          >新增员工</Button>
       <Card className="mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-full sm:w-72">

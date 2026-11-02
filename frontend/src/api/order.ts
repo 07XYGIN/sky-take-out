@@ -18,24 +18,24 @@ export function getOrder(id: number | string) {
   return requestData<OrderSummary>({ method: 'get', url: `/order/details/${id}` })
 }
 
-export function acceptOrder(id: number | string) {
-  return requestData<unknown>({ method: 'put', url: '/order/confirm', data: { id } })
+export function acceptOrder(number: string) {
+  return requestData<unknown>({ method: 'put', url: '/order/confirm', data: { id: number } })
 }
 
-export function rejectOrder(id: number | string, cancelReason: string) {
-  return requestData<unknown>({ method: 'put', url: '/order/rejection', data: { id, rejectionReason: cancelReason } })
+export function rejectOrder(number: string, cancelReason: string) {
+  return requestData<unknown>({ method: 'put', url: '/order/rejection', data: { id: number, cancelReason } })
 }
 
-export function cancelOrder(id: string, cancelReason: string) {
-  return requestData<unknown>({ method: 'put', url: '/order/cancel', data: { id, cancelReason } })
+export function cancelOrder(number: string, cancelReason: string) {
+  return requestData<unknown>({ method: 'put', url: '/order/cancel', data: { id: number, cancelReason } })
 }
 
-export function deliverOrder(id: number | string) {
-  return requestData<unknown>({ method: 'put', url: `/order/delivery/${id}` })
+export function deliverOrder(number: string) {
+  return requestData<unknown>({ method: 'put', url: `/order/delivery/${encodeURIComponent(number)}` })
 }
 
-export function completeOrder(id: number | string) {
-  return requestData<unknown>({ method: 'put', url: `/order/complete/${id}` })
+export function completeOrder(number: string) {
+  return requestData<unknown>({ method: 'put', url: `/order/complete/${encodeURIComponent(number)}` })
 }
 
 export function getOrderStatusStatistics() {

@@ -3,6 +3,7 @@ package com.example.sky.service;
 import com.example.sky.common.PageResult;
 import com.example.sky.dto.DataStatisticsDto;
 import com.example.sky.dto.OrderDto;
+import com.example.sky.exception.BusinessException;
 import com.example.sky.mapper.OrderMapper;
 import com.example.sky.vo.*;
 import com.github.pagehelper.PageHelper;
@@ -41,8 +42,12 @@ public class OrderService {
         return orderMapper.conditionSearchTab();
     }
 
-    public int cancelOrderService(String id,String cancelReason) {
-        return orderMapper.cancelOrder(cancelReason,id);
+    public int updateOrderStatusService(String number, int status, String cancelReason) {
+        int result = orderMapper.updateOrderStatus(number, status, cancelReason);
+        if (result == 0) {
+            throw new BusinessException(500, "发生未知错误，更新失败");
+        }
+        return result;
     }
 
     public OrderDetailVO orderDetailService(String orderId){

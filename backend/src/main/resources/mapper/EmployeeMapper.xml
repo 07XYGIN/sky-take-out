@@ -56,15 +56,19 @@
 
     <update id="updatePassword">
         UPDATE employee
-        SET password = #{password},
+        <set>
+            password = #{password},
             update_time = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 
     <update id="updateStatus">
         UPDATE employee
-        SET status = #{status},
+        <set>
+            status = #{status},
             update_time = NOW()
+        </set>>
         WHERE id = #{id}
     </update>
 </mapper>

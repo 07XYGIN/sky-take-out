@@ -16,6 +16,8 @@ public interface OrderMapper {
     dataStatisticsVo[] dataStatistics(@Param("beginTime") String beginTime , @Param("endTime") String endTime);
     List<OrderVo> SelectOrderList(OrderDto orderDto);
     conditionSearchTabVo conditionSearchTab();
-    int cancelOrder(@Param("cancelReason") String cancelReason , @Param("number") String number);
+    int updateOrderStatus(@Param("number") String number,
+                          @Param("status") int status,
+                          @Param("cancelReason") String cancelReason);
     OrderDetailVO orderDetail(@Param("orderId") String orderId);
 }
