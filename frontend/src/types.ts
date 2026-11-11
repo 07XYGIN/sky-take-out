@@ -1,5 +1,5 @@
 export interface PageResult<T> {
-  list: never[]
+  list: T[]
   records: T[]
   total: number
   page?: number

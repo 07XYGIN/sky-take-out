@@ -31,9 +31,9 @@ export function EmployeePage() {
         pageSize: 100,
         name: query || undefined,
       });
-      setRows(result.records || []);
-    } catch {
-      // Keep sample records visible until the backend endpoint is available.
+      setRows(result.list || []);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "员工列表加载失败");
     } finally {
       setLoading(false);
     }

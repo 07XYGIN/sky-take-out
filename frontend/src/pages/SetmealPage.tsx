@@ -45,7 +45,7 @@ export function SetmealPage() {
     try {
       const result = await getSetmealPage({
         page: 1,
-        pageSize: 100,
+        pageSize: 10,
         name: query || undefined,
       });
       setRows(result.records || []);

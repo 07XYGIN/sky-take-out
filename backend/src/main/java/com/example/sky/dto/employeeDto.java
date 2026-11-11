@@ -3,6 +3,8 @@ package com.example.sky.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class employeeDto {
     @NotBlank(message = "姓名不能为空")
@@ -16,7 +18,9 @@ public class employeeDto {
 
     private String phone;
 
-    private String sex;
+    private String sex = "1";
 
-    private String idNumber;
+    private String idNumber = "1";
+
+    private String status = "1";
 }

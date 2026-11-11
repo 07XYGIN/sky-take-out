@@ -3,6 +3,25 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.sky.mapper.EmployeeMapper">
 
+    <select id="selectEmployeeList" resultType="com.example.sky.vo.EmployeeProfileVo">
+        SELECT id,
+               username,
+               name,
+               phone,
+               sex,
+               id_number,
+               status,
+               create_time,
+               update_time
+        FROM employee
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC, id DESC
+    </select>
+
     <select id="findByUsername" resultType="com.example.sky.entity.Employee">
         SELECT id,
                name,

@@ -37,11 +37,9 @@ public class OrderService {
         List<OrderVo> orderList = orderMapper.SelectOrderList(order);
         return new PageInfo<>(orderList);
     }
-
     public conditionSearchTabVo conditionSearchTabService(){
         return orderMapper.conditionSearchTab();
     }
-
     public int updateOrderStatusService(String number, int status, String cancelReason) {
         int result = orderMapper.updateOrderStatus(number, status, cancelReason);
         if (result == 0) {
@@ -49,7 +47,6 @@ public class OrderService {
         }
         return result;
     }
-
     public OrderDetailVO orderDetailService(String orderId){
         return orderMapper.orderDetail(orderId);
     }
