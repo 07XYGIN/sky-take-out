@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.sky.mapper.CategoryMapper">
+    <select id="selectCategoryPage" resultType="com.example.sky.vo.CategoryVo">
+        SELECT id, name, type, sort, status, create_time
+        FROM category
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY sort ASC, id DESC
+    </select>
+
+    <select id="selectCategoryList" resultType="com.example.sky.vo.CategoryVo">
+        SELECT id, name, type, sort, status, create_time
+        FROM category
+        <where>
+            status = 1
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY sort ASC, id DESC
+    </select>
+    <select id="getById" resultType="com.example.sky.vo.CategoryVo">
+        SELECT id, name, type, sort, status, create_time FROM category WHERE id = #{id}
+    </select>
+    <select id="countReferences" resultType="int">
+        SELECT (SELECT COUNT(*) FROM dish WHERE category_id = #{id})
+             + (SELECT COUNT(*) FROM setmeal WHERE category_id = #{id})
+    </select>
+    <insert id="insertCategory">
+        INSERT INTO category (name, type, sort, status, create_time, update_time)
+        VALUES (#{name}, #{type}, #{sort}, #{status}, NOW(), NOW())
+    </insert>
+    <update id="updateCategory">
+        UPDATE category SET name = #{name}, type = #{type}, sort = #{sort}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+    <update id="updateStatus">
+        UPDATE category SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM category WHERE id = #{id}
+    </delete>
+</mapper>

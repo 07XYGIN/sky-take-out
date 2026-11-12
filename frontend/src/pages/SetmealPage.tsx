@@ -13,7 +13,7 @@ import {
   Table,
   message,
 } from "antd";
-import type { TableColumnsType } from "antd";
+import type { TableColumnsType, TablePaginationConfig } from "antd";
 import { Edit3, Plus, Search, Trash2 } from "lucide-react";
 import {
   addSetmeal,
@@ -37,23 +37,35 @@ export function SetmealPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [total, setTotal] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Setmeal | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (currentPage = page, currentSize = pageSize) => {
     setLoading(true);
     try {
       const result = await getSetmealPage({
-        page: 1,
-        pageSize: 10,
+        page: currentPage,
+        pageSize: currentSize,
         name: query || undefined,
       });
-      setRows(result.records || []);
+      setRows(result.list || []);
+      setTotal(result.total || 0);
     } catch {
       /* Keep local sample rows. */
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTableChange = (pagination: TablePaginationConfig) => {
+    const nextPage = pagination.current || 1;
+    const nextSize = pagination.pageSize || pageSize;
+    setPage(nextPage);
+    setPageSize(nextSize);
+    void loadData(nextPage, nextSize);
   };
   useEffect(() => {
     void loadData();
@@ -63,6 +75,7 @@ export function SetmealPage() {
   }, []);
 
   const openModal = (record?: Setmeal) => {
+    form.resetFields();
     setEditing(record || null);
     form.setFieldsValue(
       record || {
@@ -82,7 +95,8 @@ export function SetmealPage() {
       else await addSetmeal(values);
       message.success(editing ? "套餐已更新" : "套餐已创建");
       setModalOpen(false);
-      await loadData();
+      setPage(1);
+      await loadData(1, pageSize);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "保存失败");
     }
@@ -93,19 +107,8 @@ export function SetmealPage() {
       title: "套餐名称",
       dataIndex: "name",
       key: "name",
-      render: (value, record) => (
+      render: (value) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-[#e8f5f3] font-semibold text-teal">
-            {record.image ? (
-              <img
-                src={record.image}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              value?.slice(0, 1)
-            )}
-          </div>
           <span className="font-medium text-ink">{value}</span>
         </div>
       ),
@@ -143,6 +146,7 @@ export function SetmealPage() {
                       : item,
                   ),
                 );
+                message.success("状态已更新");
               } catch {
                 message.error("状态更新失败");
               }
@@ -169,12 +173,12 @@ export function SetmealPage() {
             onConfirm={async () => {
               try {
                 await deleteSetmeal([record.id]);
-                setRows((current) =>
-                  current.filter((item) => item.id !== record.id),
-                );
+                const nextPage = rows.length === 1 && page > 1 ? page - 1 : page;
+                setPage(nextPage);
+                await loadData(nextPage, pageSize);
                 message.success("套餐已删除");
-              } catch {
-                message.error("删除失败");
+              } catch (error) {
+                message.error(error instanceof Error ? error.message : "删除失败");
               }
             }}
           >
@@ -219,7 +223,14 @@ export function SetmealPage() {
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
-          <Button onClick={() => void loadData()}>查询</Button>
+          <Button
+            onClick={() => {
+              setPage(1);
+              void loadData(1, pageSize);
+            }}
+          >
+            查询
+          </Button>
         </div>
       </Card>
       <Card bodyStyle={{ padding: 0 }}>
@@ -227,9 +238,17 @@ export function SetmealPage() {
           rowKey="id"
           loading={loading}
           columns={columns}
-          dataSource={rows.filter((row) => !query || row.name.includes(query))}
+          dataSource={rows}
           locale={{ emptyText: <EmptyState label="暂无套餐记录" /> }}
-          pagination={{ pageSize: 8, showSizeChanger: false }}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            pageSizeOptions: [8, 16, 32, 64],
+            showTotal: (count) => `共 ${count} 条`,
+          }}
+          onChange={handleTableChange}
         />
       </Card>
       <Modal

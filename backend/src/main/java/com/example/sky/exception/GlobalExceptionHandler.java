@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Log4j2
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.dao.DuplicateKeyException.class)
+    public Result<Void> handleDuplicateKey(org.springframework.dao.DuplicateKeyException e) {
+        return Result.fail(409, "名称或账号已存在，请换一个");
+    }
     @ExceptionHandler(Exception.class)
     public Result<Void> handleException(Exception e) {
         log.error("服务器内部错误：{}", e.getMessage(), e);

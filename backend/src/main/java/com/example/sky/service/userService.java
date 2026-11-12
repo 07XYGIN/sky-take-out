@@ -45,9 +45,13 @@ public class userService {
         employee.setName(empDto.getName().trim());
         employee.setUsername(username);
         employee.setPassword(passwordUtil.encode(empDto.getPassword()));
-        employee.setPhone(empDto.getPhone().trim());
+        if (empDto.getPhone() != null) {
+            employee.setPhone(empDto.getPhone().trim());
+        }
         employee.setSex(empDto.getSex());
-        employee.setIdNumber(empDto.getIdNumber().toUpperCase());
+        if (empDto.getIdNumber() != null) {
+            employee.setIdNumber(empDto.getIdNumber().toUpperCase());
+        }
         employee.setStatus(1);
         employee.setCreateTime(now);
         employee.setUpdateTime(now);

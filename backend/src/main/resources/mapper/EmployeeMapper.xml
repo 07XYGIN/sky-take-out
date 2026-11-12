@@ -87,7 +87,21 @@
         <set>
             status = #{status},
             update_time = NOW()
-        </set>>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <select id="getById" resultType="com.example.sky.vo.EmployeeProfileVo">
+        SELECT id, username, name, phone, sex, id_number, status, create_time, update_time
+        FROM employee WHERE id = #{id}
+    </select>
+    <update id="updateEmployee">
+        UPDATE employee
+        <set>
+            name = #{name}, phone = #{phone}, update_time = NOW(),
+            <if test="password != null">
+                password = #{password},
+            </if>
+        </set>
         WHERE id = #{id}
     </update>
 </mapper>

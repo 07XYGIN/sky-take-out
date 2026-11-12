@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Form, Input, Modal, Switch, Table, message } from "antd";
-import type { TableColumnsType } from "antd";
+import type { TableColumnsType, TablePaginationConfig } from "antd";
 import { Edit3, Plus, Search } from "lucide-react";
 import {
   addEmployee,
@@ -20,29 +20,42 @@ export function EmployeePage() {
   const [rows, setRows] = useState<Employee[]>(fallbackEmployees);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (currentPage = page, currentSize = pageSize) => {
     setLoading(true);
     try {
       const result = await getEmployeePage({
-        page: 1,
-        pageSize: 100,
+        page: currentPage,
+        pageSize: currentSize,
         name: query || undefined,
       });
       setRows(result.list || []);
+      setTotal(result.total || 0);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "员工列表加载失败");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleTableChange = (pagination: TablePaginationConfig) => {
+    const nextPage = pagination.current || 1;
+    const nextSize = pagination.pageSize || pageSize;
+    setPage(nextPage);
+    setPageSize(nextSize);
+    void loadData(nextPage, nextSize);
+  };
   useEffect(() => {
     void loadData();
   }, []);
 
   const openModal = (record?: Employee) => {
+    form.resetFields();
     setEditing(record || null);
     form.setFieldsValue(
       record || { username: "", name: "", phone: "", status: 1 },
@@ -56,7 +69,8 @@ export function EmployeePage() {
       else await addEmployee(values);
       message.success(editing ? "员工信息已更新" : "员工已创建");
       setModalOpen(false);
-      await loadData();
+      setPage(1);
+      await loadData(1, pageSize);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "保存失败");
     }
@@ -158,7 +172,14 @@ export function EmployeePage() {
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
-          <Button onClick={() => void loadData()}>查询</Button>
+          <Button
+            onClick={() => {
+              setPage(1);
+              void loadData(1, pageSize);
+            }}
+          >
+            查询
+          </Button>
         </div>
       </Card>
       <Card bodyStyle={{ padding: 0 }}>
@@ -166,9 +187,17 @@ export function EmployeePage() {
           rowKey="id"
           loading={loading}
           columns={columns}
-          dataSource={rows.filter((row) => !query || row.name.includes(query))}
+          dataSource={rows}
           locale={{ emptyText: <EmptyState label="暂无员工记录" /> }}
-          pagination={{ pageSize: 10, showSizeChanger: false }}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50, 100],
+            showTotal: (count) => `共 ${count} 条`,
+          }}
+          onChange={handleTableChange}
         />
       </Card>
       <Modal

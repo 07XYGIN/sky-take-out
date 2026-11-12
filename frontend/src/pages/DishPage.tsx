@@ -13,7 +13,7 @@ import {
   Table,
   message,
 } from "antd";
-import type { TableColumnsType } from "antd";
+import type { TableColumnsType, TablePaginationConfig } from "antd";
 import { Edit3, Plus, Search, Trash2 } from "lucide-react";
 import {
   changeDishStatus,
@@ -38,24 +38,36 @@ export function DishPage() {
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [total, setTotal] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Dish | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (currentPage = page, currentSize = pageSize) => {
     setLoading(true);
     try {
       const result = await getDishPage({
-        page: 1,
-        pageSize: 100,
+        page: currentPage,
+        pageSize: currentSize,
         name: query || undefined,
         categoryId,
       });
-      setRows(result.records || []);
+      setRows(result.list || []);
+      setTotal(result.total || 0);
     } catch {
       // Sample records keep the management surface useful before the backend is complete.
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTableChange = (pagination: TablePaginationConfig) => {
+    const nextPage = pagination.current || 1;
+    const nextSize = pagination.pageSize || pageSize;
+    setPage(nextPage);
+    setPageSize(nextSize);
+    void loadData(nextPage, nextSize);
   };
 
   useEffect(() => {
@@ -66,6 +78,7 @@ export function DishPage() {
   }, []);
 
   const openModal = (record?: Dish) => {
+    form.resetFields();
     setEditing(record || null);
     form.setFieldsValue(
       record || {
@@ -86,7 +99,8 @@ export function DishPage() {
       else await addDish(values);
       message.success(editing ? "菜品已更新" : "菜品已创建");
       setModalOpen(false);
-      await loadData();
+      setPage(1);
+      await loadData(1, pageSize);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "保存失败");
     }
@@ -101,17 +115,6 @@ export function DishPage() {
       width: 220,
       render: (value, record) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[#fff7e7] text-sm font-semibold text-saffron">
-            {record.image ? (
-              <img
-                src={record.image}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              value?.slice(0, 1)
-            )}
-          </div>
           <div>
             <p className="font-medium text-ink">{value}</p>
             <p className="mt-0.5 text-xs text-slate-400">
@@ -180,12 +183,12 @@ export function DishPage() {
             onConfirm={async () => {
               try {
                 await deleteDish([record.id]);
-                setRows((current) =>
-                  current.filter((item) => item.id !== record.id),
-                );
+                const nextPage = rows.length === 1 && page > 1 ? page - 1 : page;
+                setPage(nextPage);
+                await loadData(nextPage, pageSize);
                 message.success("菜品已删除");
-              } catch {
-                message.error("删除失败");
+              } catch (error) {
+                message.error(error instanceof Error ? error.message : "删除失败");
               }
             }}
           >
@@ -246,7 +249,14 @@ export function DishPage() {
               onChange={setCategoryId}
             />
           </div>
-          <Button onClick={() => void loadData()}>查询</Button>
+          <Button
+            onClick={() => {
+              setPage(1);
+              void loadData(1, pageSize);
+            }}
+          >
+            查询
+          </Button>
         </div>
       </Card>
       <Card bodyStyle={{ padding: 0 }}>
@@ -254,11 +264,17 @@ export function DishPage() {
           rowKey="id"
           loading={loading}
           columns={columns}
-          dataSource={rows
-            .filter((row) => !query || row.name.includes(query))
-            .filter((row) => !categoryId || row.categoryId === categoryId)}
+          dataSource={rows}
           locale={{ emptyText: <EmptyState label="暂无菜品记录" /> }}
-          pagination={{ pageSize: 8, showSizeChanger: false }}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            pageSizeOptions: [8, 16, 32, 64],
+            showTotal: (count) => `共 ${count} 条`,
+          }}
+          onChange={handleTableChange}
           scroll={{ x: 850 }}
         />
       </Card>

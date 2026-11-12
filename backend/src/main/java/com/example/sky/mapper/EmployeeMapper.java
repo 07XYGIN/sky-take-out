@@ -10,6 +10,8 @@ import java.util.List;
 
 @Mapper
 public interface EmployeeMapper {
+    EmployeeProfileVo getById(@Param("id") Long id);
+    int updateEmployee(com.example.sky.dto.EmployeeEditDto data);
     List<EmployeeProfileVo> selectEmployeeList(EmployeePageDto employee);
 
     Employee findByUsername(@Param("username") String username);

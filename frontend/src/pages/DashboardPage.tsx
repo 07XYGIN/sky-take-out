@@ -19,9 +19,9 @@ import { EmptyState } from "../components/EmptyState";
 import { MetricCard } from "../components/MetricCard";
 import { PageHeader } from "../components/PageHeader";
 import { formatCurrency, formatDateTime } from "../lib/format";
-import type { BusinessDataEcharts, DashboardData, Dish, OrderSummary, ProductOverview } from "../types";
+import type { BusinessDataEcharts, DashboardData, Dish, ProductOverview } from "../types";
 
-const fallbackSummary: DashboardData = {};
+const fallbackSummary: DashboardData = { amount: 0, status: 0, valid: 0 };
 
 const stateResult:ProductOverview = {}
 const statusMap: Record<string, { label: string; color: string }> = {
