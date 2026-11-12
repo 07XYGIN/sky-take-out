@@ -15,7 +15,6 @@ import {
 import {
 	getLableVal,
 	dateFormat,
-	presentFormat,
 	getWeekDate
 
 } from '../../utils/index.js'
@@ -49,7 +48,7 @@ export default {
 			// rocallTime:'',
 			tablewareData: '无需餐具',
 			tableware: '',
-			packAmount: 0,
+			packAmount: null,
 			value: [0, 0],
 			timeValue: [0, 0],
 			indicatorStyle: `height: 44px;color:#333`,
@@ -63,15 +62,12 @@ export default {
 			],
 			activeRadio: '无需餐具', //存的是选中的value值
 			radioGroup: ['依据餐量提供', '无需餐具'],
-			popright: ['立即派送', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00',
-				'13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
-				'19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'
-			],
+            deliveryOptions: { today: [], tomorrow: [] },
 			newDateData: [],// 时间段
 			// styleType: 'button',
 			textTip: '',
 			showConfirm: false,
-			phoneData: '15200000001',
+			phoneData: '',
 			toDate: null,
 			tomorrowStart: null,
 			newDate: null,
@@ -182,31 +178,29 @@ export default {
 		},
 		// 获取用户送餐期望时间
 		async getEstimatedDeliveryTime() {
-			const result = await getEstimatedDeliveryTime({ shopId: this.shopInfo().shopId, customerAddress: this.address });
-			this.arrivalTime = dayjs(result.data).format('HH:mm')
-			this.orderTime = result.data
-		},
-		// 根据系统派送时间 格式化时间  [16:00,16:30]
-		getDateDate() {
-			let currentDayjs = dayjs(this.orderTime);
-			const list = ['立即派送']
-			if (!(currentDayjs.hour() >= 22 && currentDayjs.minute() > 30)) {
-				if (currentDayjs.minute() > 30) {
-					currentDayjs = currentDayjs.add(1, 'hour').set('minute', 0)
-				} else {
-					currentDayjs = currentDayjs.set('minute', 30)
-				}
-				while (true) {
-					if (currentDayjs.hour() === 23 && currentDayjs.minute() === 30) {
-						break
-					}
-					const start = `${currentDayjs.format("HH")}:${currentDayjs.format('mm')}`;
-					list.push(`${start}`)
-					currentDayjs = currentDayjs.add(30, 'minute')
-				}
-			}
-			this.newDateData = list
-		},
+            if (!this.addressBookId) return
+            const result = await getEstimatedDeliveryTime({ addressBookId: this.addressBookId })
+            const data = result.data
+            if (!data || !data.estimatedDeliveryTime) {
+                uni.showToast({ title: '配送时间暂不可用', icon: 'none' })
+                return
+            }
+            this.orderTime = data.estimatedDeliveryTime
+            this.deliveryOptions = {
+                today: data.today || [],
+                tomorrow: data.tomorrow || []
+            }
+            this.arrivalTime = '立即派送'
+            this.getDateDate()
+        },
+        getDateDate() {
+            if (!this.orderTime) {
+                this.newDateData = []
+                return
+            }
+            this.newDateData = ['立即派送'].concat(this.deliveryOptions.today)
+        },
+
 		// 获取地址
 		getAddressList() {
 			this.testValue = false
@@ -220,7 +214,7 @@ export default {
 		// 默认地址查询
 		getAddressBookDefault() {
 			return getAddressBookDefault().then(res => {
-				if (res.code === 1) {
+				if (res.code === 1 && res.data) {
 					this.addressBookId = ''
 					this.address = res.data.provinceName + res.data.cityName + res.data.districtName + res.data
 						.detail
@@ -262,7 +256,13 @@ export default {
 				this.orderDishNumber += n.number
 				console.log(n);
 			})
-			this.orderDishPrice = this.orderDishPrice + this.deliveryFee() + this.orderDishNumber
+			const packPrice = this.shopInfo().packPrice
+            if (packPrice == null || this.deliveryFee() == null) {
+                this.packAmount = null
+                return
+            }
+            this.packAmount = Number((this.orderDishNumber * Number(packPrice)).toFixed(2))
+            this.orderDishPrice = Number((this.orderDishPrice + Number(this.deliveryFee()) + this.packAmount).toFixed(2))
 		},
 		// 返回上一级
 		goBack() {
@@ -273,7 +273,11 @@ export default {
 		},
 		// 支付下单
 		payOrderHandle() {
-			this.isHandlePy = true
+			if (this.isHandlePy) return
+            if (this.packAmount == null || !this.orderTime || !this.arrivalTime || this.orderListDataes.length === 0) {
+                uni.showToast({ title: '商品、费用或配送时间尚未准备好', icon: 'none' })
+                return
+            }
 
 			if (!this.address) {
 				uni.showToast({
@@ -282,17 +286,17 @@ export default {
 				})
 				return false
 			}
+			this.isHandlePy = true
 			const params = {
 				payMethod: 1,
 				addressBookId: this.addressBookId,
 				remark: this.remark,
-				estimatedDeliveryTime: this.arrivalTime === '立即派送' ? presentFormat() : dateFormat(this.isTomorrow,
+				estimatedDeliveryTime: this.arrivalTime === '立即派送' ? this.orderTime : dateFormat(this.isTomorrow,
 					this.arrivalTime),
 				deliveryStatus: this.arrivalTime === '立即派送' ? 1 : 0,
-				remark: this.remark,
 				tablewareStatus: this.status,
 				tablewareNumber: this.num,
-				packAmount: this.orderDishNumber,
+				packAmount: this.packAmount,
 				amount: this.orderDishPrice,
 				shopId: this.shopInfo().shopId,
 				deliveryFee: this.deliveryFee()
@@ -313,12 +317,13 @@ export default {
 						icon: 'none',
 					})
 				}
-			})
+			}).catch(() => {}).finally(() => { this.isHandlePy = false })
 		},
 		// 拨打电话
 		call() {
+            if (!this.$store.state.shopPhone) return
 			uni.makePhoneCall({
-				phoneNumber: '114' //仅为示例
+				phoneNumber: this.$store.state.shopPhone
 			})
 		},
 		// // 联系商家进行取消弹层
@@ -365,7 +370,7 @@ export default {
 					this.status = 1
 				}
 
-				if (this.tableware !== '依据餐量提供' || this.tableware !== '无需餐具') {
+				if (this.tableware !== '依据餐量提供' && this.tableware !== '无需餐具') {
 					this.tablewareData = this.tableware + '份'
 
 				} else {
@@ -398,7 +403,7 @@ export default {
 		// 星期几选择
 		dateChange(index) {
 			if (index === 1) {
-				this.newDateData = this.popright.slice(1)
+				this.newDateData = this.deliveryOptions.tomorrow
 				this.isTomorrow = true
 			} else {
 				this.isTomorrow = false
@@ -410,6 +415,8 @@ export default {
 				return
 			}
 			this.tabIndex = index
+			this.arrivalTime = this.newDateData[0] || ''
+			this.setArrivalTime(this.arrivalTime)
 		},
 		// 选中时间段
 		timeClick: function (val) {
@@ -419,7 +426,7 @@ export default {
 		// 设置时间
 		setTime(val) {
 			if (val === '立即派送') {
-				this.arrivalTime = dayjs(this.orderTime).format('HH:mm')
+				this.arrivalTime = '立即派送'
 			} else {
 				this.arrivalTime = val
 			}

@@ -58,9 +58,11 @@ export default {
 	//   组件
 	components: { Status, OrderDetail, DeliveryInfo, OrderInfo },
 	onLoad(options) {
+        this.orderId = options.orderId
 		this.getBaseData(options.orderId)
 	},
 
+    onUnload() { clearTimeout(this.times) },
 	methods: {
 		...mapMutations(['setOrderData', 'initdishListMut']),
 		...mapState(['shopInfo', 'orderListData', 'shopPhone', 'orderData']),
@@ -69,9 +71,9 @@ export default {
 			getOrderDetail(id).then(res => {
 				if (res.code === 1) {
 					this.orderDetailsData = res.data
-					this.initdishListMut(this.orderDetailsData.orderDetailList)
+					this.initdishListMut(this.orderDetailsData.orderDetailList || [])
 					if (this.orderDetailsData.status === 1) {
-						this.runTimeBack(this.orderDetailsData.orderTime)
+						this.runTimeBack(this.orderDetailsData.payDeadline)
 					}
 				}
 			})
@@ -124,7 +126,7 @@ export default {
 		},
 		// 处理状态
 		statusWord(status) {
-			if (this.timeout && status === 1 || this.orderDetailsData.status === 6) {
+			if (this.orderDetailsData.status === 6) {
 				return '订单已取消'
 			}
 			switch (status) {
@@ -140,15 +142,15 @@ export default {
 		},
 		// 订单倒计时
 		runTimeBack(time) {
-			const end = Date.parse(time.replace(/-/g, "/"))
-
-			const now = Date.parse(new Date())
-			const m15 = 15 * 60 * 1000
-			const msec = m15 - (now - end)
+			clearTimeout(this.times)
+            if (!time) return
+            const end = Date.parse(String(time).replace(/-/g, '/').replace('T', ' '))
+            if (!Number.isFinite(end)) return
+            const msec = end - Date.now()
 			if (msec < 0) {
 				this.timeout = true
 				clearTimeout(this.times)
-				this.cancel('center', this.orderDetailsData) //超时的时候取消订单
+				// 订单状态由后端决定，倒计时结束不自动调用取消接口。
 			} else {
 				let min = parseInt(msec / 1000 / 60 % 60)
 				let sec = parseInt(msec / 1000 % 60)
@@ -168,7 +170,7 @@ export default {
 					if (min === 0 && sec === 0) {
 						this.timeout = true
 						clearTimeout(this.times)
-						this.cancel('center', this.orderDetailsData) //超时的时候取消订单
+						// 订单状态由后端决定，倒计时结束不自动调用取消接口。
 						return
 					}
 					this.times = setTimeout(function () {

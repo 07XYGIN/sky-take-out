@@ -37,7 +37,7 @@
             再来一单
           </button>
           <button class="new_btn btn" type="default" @click="goDetail(item.id)"
-            v-if="item.status === 1 && getOvertime(item.orderTime) > 0">
+            v-if="item.status === 1 && getOvertime(item.payDeadline) > 0">
             去支付
           </button>
         </view>

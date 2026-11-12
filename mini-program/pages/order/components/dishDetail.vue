@@ -33,10 +33,10 @@
       </view>
       <view class="orderList">
         <view class="orderInfo">
-          <text class="text">打包费</text><text class="may">￥</text>{{ orderDishNumber }}
+          <text class="text">打包费</text>{{ packAmount == null ? '待确认' : '￥' + packAmount }}
         </view>
         <view class="orderInfo">
-          <text class="text">配送费</text><text class="may">￥</text>{{ deliveryFee }}
+          <text class="text">配送费</text>{{ deliveryFee == null ? '待确认' : '￥' + deliveryFee }}
         </view>
         <view class="totalMoney">
           合计<text class="text"><text>￥</text>{{ orderDishPrice.toFixed(2) }}</text>
@@ -66,9 +66,9 @@ export default {
       default: () => [],
     },
     // 打包费
-    orderDishNumber: {
+    packAmount: {
       type: Number,
-      default: 0,
+      default: null,
     },
     // 合计总钱数
     orderDishPrice: {

@@ -23,7 +23,7 @@
           </view>
           <!-- 电话号 -->
           <view class="phone">
-            <text class="phone_text">{{ phoneNumber | getPhoneNum }}</text>
+            <text class="phone_text">{{ phoneNumber || '未绑定手机号' }}</text>
           </view>
         </view>
       </view>

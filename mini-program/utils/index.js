@@ -50,30 +50,9 @@ export const getLableVal = (item) => {
 //   3: "派送中",
 // };
 // 状态
-export const statusWord = (status, time) => {
-	if (time) {
-		if (status === 1 && time > 0) {
-			return '待付款'
-		} else if (status === 6 || (time < 0 && status === 1)) {
-			return '已完成'
-		}
-	}
-	switch (status) {
-		case 1:
-			return '待付款'
-		case 2:
-			return '等待商家接单'
-		case 3:
-			return '等待骑手接单'
-		case 4:
-			return '派送中'
-		case 5:
-			return '派送中'
-		case 6:
-			return '已完成'
-		case 7:
-			return '已取消'
-	}
+export const statusWord = (status) => {
+    const labels = { 1: '待付款', 2: '待接单', 3: '已接单', 4: '派送中', 5: '已完成', 6: '已取消', 7: '退款中' }
+    return labels[status] || '未知状态'
 }
 // 倒计时
 export const runTimeBack = () => {
@@ -102,12 +81,12 @@ export const runTimeBack = () => {
 
 
 }
-export const getOvertime = (time) => {
-	const end = Date.parse(new Date(time.replace(/-/g, "/")))
-	const now = Date.parse(new Date())
-	const m15 = 15 * 60 * 1000
-	const msec = m15 - (now - end)
-	return msec
+// 支付截止时间由服务端返回；未返回时不在前端猜测过期时间。
+export const getOvertime = (payDeadline) => {
+    if (!payDeadline) return Infinity
+    const deadline = Date.parse(String(payDeadline).replace(/-/g, '/').replace('T', ' '))
+    if (!Number.isFinite(deadline)) return Infinity
+    return deadline - Date.now()
 }
 // export const runTime=()=>{
 // 	const end = Date.parse(new Date(this.orderData().orderTime))
@@ -148,7 +127,7 @@ export const getWeekDate = (date) => {
 }
 export const presentFormat = () => {
 	var date = new Date();
-	date.setTime(date.getTime() + 3600000)
+
 	//年 getFullYear()：四位数字返回年份
 	var year = date.getFullYear(); //getFullYear()代替getYear()
 	//月 getMonth()：0 ~ 11
@@ -162,7 +141,7 @@ export const presentFormat = () => {
 	//秒 getSeconds()：(0 ~ 59)
 	var second = date.getSeconds()
 	var time = + year + '-' + addZero(month) + '-' + addZero(day) + ' ' + addZero(hour) + ':' + addZero(minute) + ':' + addZero(second);
-	debugger
+
 	return time;
 }
 function addZero(s) {

@@ -7,13 +7,13 @@
         mode=""
       ></image>
       <view class="success_title"> 下单成功 </view>
-      <view class="word-box">
+      <view class="word-box" v-if="arrivalTime">
         <text class="word_bottom"
           >预计<text class="word_date">{{ arrivalTime }}</text
           >送达</text
         >
       </view>
-      <view class="success_desc"> 后厨已开始疯狂备餐中, 请耐心等待~ </view>
+      <view class="success_desc"> 请在订单详情中查看最新进度 </view>
       <!-- 新添加 -->
       <view class="btns">
         <view class="go_dish defaultBtn" @click="goIndex()"> 返回首页 </view>
@@ -24,6 +24,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
+import { getOrderDetail } from "../api/api.js";
 export default {
   data() {
     return {
@@ -37,9 +38,10 @@ export default {
     },
   },
   onLoad(options) {
-    // 获取一小时以后的时间
-    this.getHarfAnOur();
     this.orderId = options.orderId;
+    getOrderDetail(this.orderId).then((res) => {
+      this.arrivalTime = res.data.estimatedDeliveryTime || '';
+    }).catch(() => {});
   },
   methods: {
     ...mapState(["shopInfo", "arrivals"]),
@@ -136,4 +138,3 @@ export default {
   }
 }
 </style>
- 

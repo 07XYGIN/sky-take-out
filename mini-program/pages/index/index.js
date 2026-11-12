@@ -59,11 +59,7 @@ export default {
 			orderDishNumber: 0,
 			// 菜品金额
 			orderDishPrice: 0,
-			params: {
-				shopId: "f3deb",
-				storeId: "1282344676983062530",
-				tableId: "1282346960773238786",
-			},
+			params: {},
 			// 添加一个右侧number更新以后重新刷新接口的id --- 这个id来自左侧菜品分类的id
 			rightIdAndType: {},
 			phoneData: "",
@@ -130,16 +126,15 @@ export default {
 				})
 			}
 		})
-		if (options) {
-			if (!options.status && !options.formOrder) {
-				this.getData()
-			}
-		}
+
 	},
 	onShow() {
 		if (this.token()) {
+			this.getShopInfo()
 			this.init()
-		}
+		} else {
+            this.getData()
+        }
 	},
 	methods: {
 		//   vuex储存信息
@@ -190,95 +185,41 @@ export default {
 			}
 		},
 		loginSync() {
-			return new Promise((resolve, reject) => {
-				uni.login({
-					success: (loginRes) => {
-						if (loginRes.errMsg === "login:ok") {
-							resolve(loginRes.code)
-						}
-					},
-				})
-			})
-		},
-		// 获取用户信息
-		getData() {
-			let res = this.getMenuButtonRect()
-			let _this = this
-			// 获取店铺状态
-			this.getShopInfo()
-			this.selectHeight = res.height
-			if (this.token() === "") {
-				uni.showModal({
-					title: "温馨提示",
-					content: "亲，授权微信登录后才能点餐！",
-					showCancel: false,
-					success(res) {
-						if (res.confirm) {
-							let jsCode = ""
-							uni.login({
-								provider: "weixin",
-								success: (loginRes) => {
-									if (loginRes.errMsg === "login:ok") {
-										jsCode = loginRes.code
-									}
-								},
-							})
-							// 授权
-							uni.getUserProfile({
-								desc: "登录",
-								success: function (userInfo) {
-									_this.setBaseUserInfo(userInfo.userInfo)
-									const params = {
-										code: jsCode,
-										// 传递地理位置信息
-									}
-									// 获取定位信息
-									uni.getLocation({
-										type: 'gcj02', isHighAccuracy: true
-									}).then(([err, result]) => {
-										if (err) {
-											uni.showToast({
-												title: "获取地理位置失败",
-												icon: "none"
-											})
-										} else {
-											if (process.env.NODE_ENV === '"development"') {
-												params.location = `116.481488,39.990464`//	先写死在北京
-											} else {
-												params.location = `${result.longitude},${result.latitude}`
-											}
-
-											userLogin(params)
-												.then((success) => {
-													if (success.code === 1) {
-														_this.setToken(success.data.token)
-														// 保存配送费
-														_this.setDeliveryFee(success.data.deliveryFee)
-														// 保存商铺信息
-														_this.setShopInfo({
-															shopName: success.data.shopName,
-															shopAddress: success.data.shopAddress,
-															shopId: success.data.shopId,
-														})
-														_this.init()
-													}
-												})
-												.catch((err) => { })
-
-
-
-										}
-
-									})
-
-								},
-								fail: function (err) { },
-							})
-						}
-					},
-				})
-			}
-		},
+            return new Promise((resolve, reject) => {
+                uni.login({
+                    provider: 'weixin',
+                    success(res) {
+                        if (res.code) resolve(res.code)
+                        else reject(new Error('未获取到微信登录凭证'))
+                    },
+                    fail: reject
+                })
+            })
+        },
+        async getData() {
+            this.getShopInfo()
+            this.selectHeight = this.getMenuButtonRect().height
+            if (this.token()) return
+            uni.showModal({
+                title: '微信登录',
+                content: '登录后可点餐和查看订单',
+                success: async (result) => {
+                    if (!result.confirm) return
+                    try {
+                        const code = await this.loginSync()
+                        const response = await userLogin({ code })
+                        if (!response.data || !response.data.token) {
+                            throw new Error('登录接口未返回 token')
+                        }
+                        this.setToken(response.data.token)
+                        this.setBaseUserInfo(response.data.user || {})
+                        await this.init()
+                    } catch (error) {
+                        uni.showToast({ title: error.message || '登录失败，请重试', icon: 'none' })
+                    }
+                }
+            })
+        },
 
 		async init() {
 			// 获取菜品和套餐分类接口
@@ -287,7 +228,7 @@ export default {
 			}
 
 			// 获取店铺联系方式
-			this.getMerchantInfo()
+			await this.getMerchantInfo()
 			getCategoryList().then((res) => {
 				if (res && res.code === 1) {
 					this.typeListData = [...res.data]
@@ -313,7 +254,7 @@ export default {
 		},
 		// 获取一个目标元素的高度
 		getElRect(elClass, dataVal) {
-			new Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
 				const query = uni.createSelectorQuery().in(this)
 				query
 					.select("." + elClass)
@@ -324,9 +265,7 @@ export default {
 						(res) => {
 							// 如果节点尚未生成，res值为null，循环调用执行
 							if (!res) {
-								setTimeout(() => {
-									this.getElRect(elClass)
-								}, 10)
+								resolve()
 								return
 							}
 							this[dataVal] = res.height
@@ -352,18 +291,17 @@ export default {
 		},
 		// 获取右边菜单每个item到顶部的距离
 		getMenuItemTop() {
-			new Promise((resolve) => {
+			return new Promise((resolve) => {
 				let selectorQuery = uni.createSelectorQuery()
 				selectorQuery
 					.selectAll(".class-item")
 					.boundingClientRect((rects) => {
 						// 如果节点尚未生成，rects值为[](因为用selectAll，所以返回的是数组)，循环调用执行
-						if (!rects.length) {
-							setTimeout(() => {
-								this.getMenuItemTop()
-							}, 10)
+						if (!rects || !rects.length) {
+							resolve()
 							return
 						}
+						resolve()
 					})
 					.exec()
 			})
@@ -411,7 +349,7 @@ export default {
 					})
 					.catch((err) => { })
 			}
-			this.typeIndex = index
+			this.typeIndex = index || 0
 			this.setOrderNum()
 		},
 		// 获取首页店铺信息
@@ -430,7 +368,9 @@ export default {
 				.then((res) => {
 					this.phoneData = res.data.phone
 					console.log(res);
-					this.setShopPhone(res.data)
+					this.setShopPhone(res.data.phone || '')
+                    this.setShopInfo(res.data)
+                    this.setDeliveryFee(res.data.deliveryFee == null ? null : Number(res.data.deliveryFee))
 				})
 				.catch((err) => { })
 		},

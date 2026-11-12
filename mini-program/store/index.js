@@ -6,9 +6,9 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
 	state: {
 		storeInfo: {}, // 店铺请求的id信息
-		shopInfo: '',  // 店铺详细信息
+		shopInfo: {},  // 店铺详细信息
 		orderListData: [],// 购物车列表信息
-		baseUserInfo: '', // 存储获取的用户微信的信息（用户名、头像）
+		baseUserInfo: uni.getStorageSync('sky-user') || {}, // 用户信息
 		lodding: false,
 		sessionId: '',
 		addressBackUrl: '',
@@ -16,11 +16,11 @@ const store = new Vuex.Store({
 		shopPhone: '', //店铺电话
 		shopStatus: {}, //店铺状态
 		orderData: {},
-		token: '',
+		token: uni.getStorageSync('sky-token') || '',
 		arrivals: '',
 		remarkData: '',//备注
 		addressData: {}, //地址选择
-		deliveryFee: 0,// 配送费
+		deliveryFee: null,// 尚未从接口获取费用
 		gender: 0 // 收货地址对应的 性别  0 先生  1 女士
 	},
 	mutations: {
@@ -35,6 +35,7 @@ const store = new Vuex.Store({
 		},
 		setBaseUserInfo(state, provider) {
 			state.baseUserInfo = provider
+			uni.setStorageSync('sky-user', provider)
 		},
 		setLodding(state, provider) {
 			state.lodding = provider
@@ -60,6 +61,17 @@ const store = new Vuex.Store({
 		},
 		setToken(state, provider) {
 			state.token = provider
+			uni.setStorageSync('sky-token', provider)
+		},
+		clearSession(state) {
+			state.token = ''
+			state.baseUserInfo = {}
+			state.orderListData = []
+			state.addressData = {}
+			state.orderData = {}
+			state.remarkData = ''
+			uni.removeStorageSync('sky-token')
+			uni.removeStorageSync('sky-user')
 		},
 		setArrivalTime(state, provider) {
 			state.arrivals = provider

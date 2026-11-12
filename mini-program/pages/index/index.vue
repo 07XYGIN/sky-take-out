@@ -14,7 +14,7 @@
             </view>
             <view class="info_top_right">
               <view class="right_title">
-                <text>苍穹外卖</text>
+                <text>{{ shopInfo().shopName || '店铺信息加载中' }}</text>
                 <view class="businessStatus" v-if="shopStatus === 1">营业中</view>
                 <view class="businessStatus close" v-else>休息中</view>
               </view>
@@ -22,7 +22,7 @@
                 <!-- 中 -->
                 <view class="details_flex">
                   <image class="top_icon" src="../../static/money.png"></image>
-                  <text class="icon_text">配送费{{ deliveryFee() }}元</text>
+                  <text class="icon_text">{{ deliveryFee() == null ? '配送费待确认' : '配送费' + deliveryFee() + '元' }}</text>
                 </view>
               </view>
             </view>
@@ -30,7 +30,7 @@
           <!-- 下部---信息简介 -->
           <view class="info_bottom">
 				<view>
-				  <view class="word">苍穹餐厅为顾客打造专业的大众化美食外送餐饮</view>
+				  <view class="word" v-if="shopInfo().description">{{ shopInfo().description }}</view>
 				  <view class="address">
 					<view class="address_icon"></view>
 					{{ shopInfo().shopAddress || "商家店铺获取中.." }}
@@ -71,7 +71,7 @@
               <view class="dish_label" @click="openDetailHandle(item)">{{
                 item.description || item.name
               }}</view>
-              <view class="dish_label" @click="openDetailHandle(item)">月销量0</view>
+              <view class="dish_label" v-if="item.monthlySales != null" @click="openDetailHandle(item)">月销量{{ item.monthlySales }}</view>
               <view class="dish_price">
                 <text class="ico">￥</text>
                 {{ item.price.toFixed(2) }}

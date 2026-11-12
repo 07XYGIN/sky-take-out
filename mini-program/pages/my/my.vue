@@ -4,7 +4,7 @@
       @clickLeft="goBack"
       left-icon="back"
       leftIcon="arrowleft"
-      title="地址管理"
+      title="个人中心"
       statusBar="true"
       fixed="true"
       color="#ffffff"
@@ -13,13 +13,13 @@
 
     <view class="my-center">
       <!-- 头像展示部分 -->
-      <head
+      <head-info
         :psersonUrl="psersonUrl"
         :nickName="nickName"
         :gender="gender"
         :phoneNumber="phoneNumber"
         :getPhoneNum="getPhoneNum"
-      ></head>
+      ></head-info>
 
       <view class="container">
         <!-- 地址和历史订单 -->
@@ -63,8 +63,10 @@ export default {
       psersonUrl: "../../static/btn_waiter_sel.png",
       nickName: "",
       gender: "0",
-      phoneNumber: "18500557668",
+      phoneNumber: "",
       recentOrdersList: [],
+      fetching: false,
+      requestId: 0,
       sumOrder: {
         amount: 0,
         number: 0,
@@ -99,7 +101,7 @@ export default {
     this.gender =
       this.$store.state.baseUserInfo && this.$store.state.baseUserInfo.gender;
     this.phoneNumber =
-      this.$store.state.shopPhone && this.$store.state.shopPhone;
+      (this.$store.state.baseUserInfo && this.$store.state.baseUserInfo.phone) || "";
     this.getList();
   },
   created() {},
@@ -119,22 +121,31 @@ export default {
       return getOvertime(time);
     },
     // 获取列表数据
-    getList() {
-      const params = {
-        pageSize: 10,
-        page: this.pageInfo.page,
-      };
-      getOrderPage(params).then((res) => {
-        if (res.code === 1) {
-          this.recentOrdersList = this.recentOrdersList.concat(
-            res.data.records
-          );
-          this.pageInfo.total = res.data.total;
-          this.loadingText = "";
+    async getList(nextPage = 1) {
+      if (this.fetching && nextPage > 1) return;
+      const requestId = ++this.requestId;
+      this.fetching = true;
+      const params = { page: nextPage, pageSize: this.pageInfo.pageSize };
+      const fetchPage = getOrderPage;
+      try {
+        const res = await fetchPage(params);
+        if (requestId !== this.requestId) return;
+        const rows = res.data.records || [];
+        this.recentOrdersList = nextPage === 1 ? rows : this.recentOrdersList.concat(rows);
+        this.pageInfo.page = nextPage;
+        this.pageInfo.total = Number(res.data.total);
+        this.loadingText = this.recentOrdersList.length >= this.pageInfo.total ? "没有更多了" : "";
+      } catch (error) {
+        // 请求层统一显示错误；失败时保留页码，允许重试。
+      } finally {
+        if (requestId === this.requestId) {
+          this.fetching = false;
           this.loading = false;
         }
-      });
+        uni.hideLoading();
+      }
     },
+
     // 去地址页面
     goAddress() {
       this.setAddressBackUrl("/pages/my/my");
@@ -174,21 +185,13 @@ export default {
       });
     },
     dataAdd() {
-      const pages = Math.ceil(this.pageInfo.total / 10); //计算总页数
-      if (this.pageInfo.page === pages) {
-        this.loadingText = "没有更多了";
-        this.loading = true;
-      } else {
-        this.pageInfo.page++;
-        this.getList();
-      }
+      if (this.fetching || this.recentOrdersList.length >= this.pageInfo.total) return;
+      this.getList(this.pageInfo.page + 1);
     },
-
     lower() {
-      this.loadingText = "数据加载中...";
-      this.loading = true;
       this.dataAdd();
     },
+
     goBack() {
       uni.redirectTo({
         url: "/pages/index/index",

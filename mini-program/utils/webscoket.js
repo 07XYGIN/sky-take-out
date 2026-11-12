@@ -1,7 +1,9 @@
 import { Stomp } from './stomp'
 import store from './../store'
+import { webSocketUrl } from './env'
 
 export default function initWebScoket(params){
+	if (!webSocketUrl) return
 	
 	var socketOpen = false;
 	var socketMsgQueue = [];	
@@ -21,7 +23,7 @@ export default function initWebScoket(params){
 	}
 	
 	uni.connectSocket({
-	  url: 'wss://socket-canzg.itheima.net/ws'
+	  url: webSocketUrl
 	});
 	
 	uni.onSocketOpen(function (res) {

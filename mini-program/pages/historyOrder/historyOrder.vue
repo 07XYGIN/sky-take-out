@@ -53,7 +53,7 @@
                   再来一单
                 </button>
                 <button class="new_btn btn" type="default" @click="goDetail(item.id)"
-                  v-if="item.status === 1 && getOvertime(item.orderTime) > 0">
+                  v-if="item.status === 1 && getOvertime(item.payDeadline) > 0">
                   去支付
                 </button>
                 <button class="new_btn btn" type="default" @click="handleReminder('center', item.id)"
@@ -95,6 +95,8 @@ export default {
   data() {
     return {
       recentOrdersList: [],
+      fetching: false,
+      requestId: 0,
       pageInfo: {
         page: 1,
         pageSize: 10,
@@ -127,6 +129,8 @@ export default {
       textTip: "",
       showConfirm: false,
       isEmpty: false,
+      loading: false,
+      loadingText: '',
     };
   },
   onLoad() {
@@ -151,14 +155,8 @@ export default {
     uni.stopPullDownRefresh();
     this.showTitle = true;
   },
-  onReachBottom() {
-    if (this.recentOrdersList.length < Number(this.pageInfo.total)) {
-      this.pageInfo.page++;
-      this.loadingStatus = "loading";
-      this.getList(this.status);
-      this.showTitle = true;
-    }
-  },
+  onReachBottom() { this.dataAdd(); },
+
   methods: {
     ...mapMutations(["setAddressBackUrl"]),
     numes(list) {
@@ -178,28 +176,33 @@ export default {
       return getOvertime(time);
     },
     // 获取历史订单列表
-    getList() {
-      const key = this.urlMap[this.tabIndex].key;
-      const fn = this.urlMap[this.tabIndex].fn;
-      const params = {
-        pageSize: 10,
-        page: this.pageInfo.page,
-      };
-      params[key] = this[key]
-      uni.showLoading({ title: "加载中", mask: true });
-      fn(params).then((res) => {
-        if (res.code === 1) {
-          setTimeout(function () {
-            uni.hideLoading();
-          }, 100);
-          this.recentOrdersList = this.recentOrdersList.concat(
-            res.data.records
-          );
-          this.pageInfo.total = res.data.total;
-          this.isEmpty = true;
+    async getList(nextPage = 1) {
+      if (this.fetching && nextPage > 1) return;
+      const requestId = ++this.requestId;
+      this.fetching = true;
+      const params = { page: nextPage, pageSize: this.pageInfo.pageSize };
+      const config = this.urlMap[this.tabIndex];
+      params[config.key] = this[config.key];
+      const fetchPage = config.fn;
+      try {
+        const res = await fetchPage(params);
+        if (requestId !== this.requestId) return;
+        const rows = res.data.records || [];
+        this.recentOrdersList = nextPage === 1 ? rows : this.recentOrdersList.concat(rows);
+        this.pageInfo.page = nextPage;
+        this.pageInfo.total = Number(res.data.total);
+        this.loadingText = this.recentOrdersList.length >= this.pageInfo.total ? "没有更多了" : "";
+      } catch (error) {
+        // 请求层统一显示错误；失败时保留页码，允许重试。
+      } finally {
+        if (requestId === this.requestId) {
+          this.fetching = false;
+          this.loading = false;
         }
-      });
+        uni.hideLoading();
+      }
     },
+
     // 再来一单
     async oneMoreOrder(id) {
       let pages = getCurrentPages();
@@ -247,21 +250,13 @@ export default {
       this.changeTab(e.detail.current);
     },
     dataAdd() {
-      const pages = Math.ceil(this.pageInfo.total / 10); //计算总页数
-      if (this.pageInfo.page === pages) {
-        this.loadingText = "没有更多了";
-        this.loading = true;
-      } else {
-        this.pageInfo.page++;
-        this.getList();
-      }
+      if (this.fetching || this.recentOrdersList.length >= this.pageInfo.total) return;
+      this.getList(this.pageInfo.page + 1);
     },
-
     lower() {
-      this.loadingText = "数据加载中...";
-      this.loading = true;
       this.dataAdd();
     },
+
     // 去详情页面
     goDetail(id) {
       this.setAddressBackUrl("/pages/historyOrder/historyOrder");
@@ -274,7 +269,7 @@ export default {
           this.showConfirm = true;
           this.textTip = "您的催单信息已发出！";
           this.$refs.commonPopup.open(type);
-          this.getList(this.status);
+          this.getList();
         }
       });
     },

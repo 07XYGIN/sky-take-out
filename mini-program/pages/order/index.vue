@@ -40,7 +40,7 @@
           <dish-detail
             :orderDataes="orderDataes"
             :showDisplay="showDisplay"
-            :orderDishNumber="orderDishNumber"
+            :packAmount="packAmount"
             :orderListDataes="orderListDataes"
             :orderDishPrice="orderDishPrice"
           ></dish-detail>

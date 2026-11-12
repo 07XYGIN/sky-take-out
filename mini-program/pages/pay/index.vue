@@ -6,7 +6,7 @@
         <view class="orderPay">
           <view>
             <view v-if="timeout">订单已超时</view>
-            <view v-else
+            <view v-else-if="rocallTime"
               >支付剩余时间<text>{{ rocallTime }}</text></view
             >
           </view>
@@ -47,7 +47,7 @@
         </view>
       </view>
       <view class="bottomBox btnBox">
-        <button class="add_btn" type="primary" plain="true" @click="handleSave">
+        <button class="add_btn" type="primary" plain="true" @click="handleSave" :disabled="!ready || timeout || paying" :loading="paying">
           确认支付
         </button>
       </view>
@@ -57,7 +57,7 @@
 
 <script>
 import { mapState } from "vuex";
-import { paymentOrder, cancelOrder } from "@/pages/api/api.js";
+import { paymentOrder, getOrderDetail } from "@/pages/api/api.js";
 export default {
   data() {
     return {
@@ -68,104 +68,79 @@ export default {
       activeRadio: 0,
       payMethodList: ["微信支付"],
       times: null,
+      paying: false,
+      ready: false
     };
   },
-  created() {
-    this.orderDataInfo = this.orderData();
-  },
-  mounted() {
-    this.runTimeBack();
-  },
-  onLoad(options) {
+  async onLoad(options) {
     this.orderId = options.orderId;
+    try {
+      await this.loadOrder();
+    } catch (error) {
+      this.ready = false;
+    }
   },
+  onUnload() { clearTimeout(this.times); },
   methods: {
-    ...mapState(["orderData", "shopInfo"]),
-    // 支付详情
-    handleSave() {
-      if (this.timeout) {
-        cancelOrder(this.orderId).then((res) => {});
-        uni.redirectTo({
-          url: "/pages/details/index?orderId=" + this.orderId,
-        });
-      } else {
-        // 如果支付成功进入成功页
-        clearTimeout(this.times);
-        const params = {
+    ...mapState(["shopInfo"]),
+    styleChange() { this.activeRadio = 0; },
+    async loadOrder() {
+      const response = await getOrderDetail(this.orderId);
+      const order = response.data;
+      this.orderDataInfo = {
+        ...order,
+        orderNumber: order.number,
+        orderAmount: order.amount
+      };
+      this.ready = order.status === 1;
+      this.runTimeBack();
+    },
+    async handleSave() {
+      if (this.paying || !this.ready || this.timeout) return;
+      this.paying = true;
+      try {
+        const response = await paymentOrder({
           orderNumber: this.orderDataInfo.orderNumber,
-          payMethod: this.activeRadio === 0 ? 1 : 2,
-        };
-        paymentOrder(params).then(async (res) => {
-          if (res.code === 1) {
-            const [err, payRes] = await uni.requestPayment({
-              ...res.data,
-              package: res.data.packageStr, // package 为微信支付必须的字段
-            });
-            console.log(err, payRes);
-            if (err) {
-              await uni.showToast({ title: "支付失败", icon: "error" });
-              setTimeout(() => {
-                // 下单失败!!
-                uni.redirectTo({
-                  url: "/pages/details/index?orderId=" + this.orderId,
-                });
-              }, 1500);
-            } else {
-              await uni.showToast({ title: "支付成功", icon: "success" });
-              setTimeout(() => {
-                // 下单成功!!
-                uni.redirectTo({
-                  url: "/pages/success/index?orderId=" + this.orderId,
-                });
-              }, 1500);
-            }
-          } else {
-            uni.showToast({
-              title: res.msg,
-              duration: 1000,
-              icon: "none",
-            });
-          }
+          payMethod: 1
         });
+        const data = response.data;
+        if (!data || !data.timeStamp || !data.paySign || !(data.packageStr || data.package)) {
+          throw new Error("后端未返回完整的微信支付参数");
+        }
+        await new Promise((resolve, reject) => {
+          uni.requestPayment({
+            ...data,
+            package: data.packageStr || data.package,
+            success: resolve,
+            fail: reject
+          });
+        });
+        // 微信回调后再查后端订单，支付回调尚未入库时先进入详情页。
+        const result = await getOrderDetail(this.orderId);
+        const paid = Number(result.data.payStatus) === 1;
+        uni.redirectTo({
+          url: (paid ? "/pages/success/index?orderId=" : "/pages/details/index?orderId=") + this.orderId
+        });
+      } catch (error) {
+        uni.showToast({ title: error.message || "支付未完成，请重试", icon: "none" });
+      } finally {
+        this.paying = false;
       }
     },
-    // // 订单倒计时
     runTimeBack() {
-      const end = Date.parse(this.orderDataInfo.orderTime.replace(/-/g, "/"));
-      const now = Date.parse(new Date());
-      const m15 = 15 * 60 * 1000;
-      const msec = m15 - (now - end);
-      if (msec < 0) {
-        this.timeout = true;
-        clearTimeout(this.times);
-      } else {
-        let min = parseInt((msec / 1000 / 60) % 60);
-        let sec = parseInt((msec / 1000) % 60);
-        if (min < 10) {
-          min = "0" + min;
-        } else {
-          min = min;
-        }
-        if (sec < 10) {
-          sec = "0" + sec;
-        } else {
-          sec = sec;
-        }
-        this.rocallTime = min + ":" + sec;
-        let that = this;
-        if (min >= 0 && sec >= 0) {
-          if (min === 0 && sec === 0) {
-            this.timeout = true;
-            clearTimeout(this.times);
-            return;
-          }
-          this.times = setTimeout(function () {
-            that.runTimeBack();
-          }, 1000);
-        }
-      }
-    },
-  },
+      clearTimeout(this.times);
+      if (!this.orderDataInfo.payDeadline) return;
+      const deadline = Date.parse(String(this.orderDataInfo.payDeadline).replace(/-/g, "/").replace("T", " "));
+      if (!Number.isFinite(deadline)) return;
+      const remaining = deadline - Date.now();
+      this.timeout = remaining <= 0;
+      if (this.timeout) return;
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor(remaining / 1000) % 60;
+      this.rocallTime = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      this.times = setTimeout(() => this.runTimeBack(), 1000);
+    }
+  }
 };
 </script>
 <style src="./../common/Navbar/navbar.scss" lang="scss" scoped></style>

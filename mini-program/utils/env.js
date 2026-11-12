@@ -1,8 +1,5 @@
-
-// 测试环境
-// export const baseUrl = 'http://reggie-dev.itheima.net'
-// export const baseUrl = 'http://172.16.43.24:8080'
-// export const baseUrl ='https://reggie-parent-t.itheima.net'
-export const baseUrl = 'http://2ae29966.r10.cpolar.top'
-// 线上环境
-// export const baseUrl = 'https://registakeaway.itheima.net'
+// 微信开发者工具可使用 localhost；真机调试改成电脑的局域网 IP。
+// 正式发布使用微信后台配置的 HTTPS 服务地址，保留 /api 前缀。
+export const baseUrl = 'http://localhost:8080/api'
+// 旧桌台 WebSocket 尚未接入外卖页面，需要时单独配置。
+export const webSocketUrl = ''
