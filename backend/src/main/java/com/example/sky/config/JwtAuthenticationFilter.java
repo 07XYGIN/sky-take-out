@@ -33,20 +33,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); //无 Token 时直接放行
             return;
         }
 
         String token = authHeader.substring(7);
 
-        if (jwtUtil.validateToken(token)
-                && !tokenBlacklistService.isInvalid(token)
-                && isEmployeeEnabled(token)) {
-            String username = jwtUtil.getUsernameFromToken(token);
+        if (jwtUtil.validateToken(token) && !tokenBlacklistService.isInvalid(token)) // 如果token在有效期内且没有在黑名单
+        {
+            String platform = jwtUtil.getPlatformFromToken(token);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 按请求路径区分小程序端与管理端
+            String uri = request.getRequestURI();
+            if (uri.startsWith("/api/miniapp/")) {
+                // 小程序端： platform == "miniapp"
+                if ("miniapp".equals(platform)) {
+                    // 拿到用户名
+                    String username = jwtUtil.getUsernameFromToken(token);
+                    // 创建认证对象
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                    // 设置认证信息
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } else {
+                // 管理端：platform == "web" 且 员工启用
+                if ("web".equals(platform) && isEmployeeEnabled(token)) {
+                    String username = jwtUtil.getUsernameFromToken(token);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+
         }
 
         filterChain.doFilter(request, response);
