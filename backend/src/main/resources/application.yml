@@ -34,3 +34,7 @@ jwt:
 
 snowflake:
   worker-id: ${SNOWFLAKE_WORKER_ID:1}
+
+wx:
+  appid: ${LEARN_APPID}
+  secret: ${LEARN_Secret}

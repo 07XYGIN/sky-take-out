@@ -25,10 +25,13 @@ const fallbackSummary: DashboardData = { amount: 0, status: 0, valid: 0 };
 
 const stateResult:ProductOverview = {}
 const statusMap: Record<string, { label: string; color: string }> = {
+  1: {label:"待付款",color:"#FA8C16"},
   2: { label: "待接单", color: "gold" },
   3: { label: "已接单", color: "blue" },
   4: { label: "配送中", color: "cyan" },
   5: { label: "已完成", color: "green" },
+  6: { label: "已取消", color: "#8C8C8C" },
+  7: { label: "退款", color: "#389E0D" },
 };
 
 export function DashboardPage() {

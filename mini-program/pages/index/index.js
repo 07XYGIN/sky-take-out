@@ -210,7 +210,7 @@ export default {
                         const response = await userLogin({ code })
                         if (!response.data || !response.data.token) {
                             throw new Error('登录接口未返回 token')
-                        }
+                        }						
                         this.setToken(response.data.token)
                         this.setBaseUserInfo(response.data.user || {})
                         await this.init()
