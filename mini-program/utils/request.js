@@ -4,7 +4,6 @@ import { baseUrl } from './env'
 export function request({ url = '', params = {}, method = 'GET' }) {
     const header = { 'Content-Type': 'application/json' }
     if (store.state.token) {
-        header.authentication = store.state.token
         header.Authorization = 'Bearer ' + store.state.token
     }
     return new Promise((resolve, reject) => {
