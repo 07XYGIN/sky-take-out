@@ -2,13 +2,7 @@ package com.example.sky.mapper;
 
 import com.example.sky.dto.MiniappCartItemDto;
 import com.example.sky.dto.MiniappCartNumberDto;
-import com.example.sky.vo.MiniappAddressBookVo;
-import com.example.sky.vo.MiniappDishVo;
-import com.example.sky.vo.MiniappDishFlavorVo;
-import com.example.sky.vo.MiniappShopVo;
-import com.example.sky.vo.MiniappShopingCartVo;
-import com.example.sky.vo.MiniappUserVo;
-import com.example.sky.vo.SetmealVo;
+import com.example.sky.vo.*;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -106,4 +100,23 @@ public interface MiniappUserMapper {
     @Select("select shop_id, shop_name, image, description, shop_address, phone, status, delivery_fee, pack_price " +
             "from shop where shop_id = #{shopId}")
     MiniappShopVo getMerchantInfoMapper(Long shopId);
+
+    @Select("select d.name AS name,d.image AS image ,d.id AS dish_id,d.price AS price from dish d where d.id = #{dishId}")
+    DishVo getDishInfoMapper(Long dishId);
+
+    @Insert("insert into shopping_cart (" +
+            "name, image, user_id, dish_id, dish_flavor, amount" +
+            ") values (" +
+            "#{name}, #{image}, #{userId}, #{dishId}, #{dishFlavor}, #{amount}" +
+            ")")
+    int insertCart(MiniappShopingCartVo shoppingCart);
+
+    @Select("select * from shopping_cart " +
+            "where user_id = #{userId} and dish_id = #{dishId} and dish_flavor = #{dishFlavor}")
+    MiniappShopingCartVo getCartItem(@Param("userId") Long userId,
+                                     @Param("dishId") Long dishId,
+                                     @Param("dishFlavor") String dishFlavor);
+
+    @Update("update shopping_cart set number = #{number} where id = #{id}")
+    Integer updateNumber(@Param("id") Long id, @Param("number") Integer number);
 }

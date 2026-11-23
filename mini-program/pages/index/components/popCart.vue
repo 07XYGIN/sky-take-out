@@ -82,7 +82,7 @@ export default {
       this.$emit("clearCardOrder");
     },
     // 加入购物车
-    addDishAction(obj, item) {
+    addDishAction(obj, item) {      
       this.$emit("addDishAction", { obj: obj, item: item });
     },
     redDishAction(obj, item) {

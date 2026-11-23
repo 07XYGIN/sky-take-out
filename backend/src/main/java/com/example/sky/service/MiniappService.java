@@ -5,16 +5,10 @@ import com.example.sky.common.JwtUtil;
 import com.example.sky.dto.MiniappCartItemDto;
 import com.example.sky.dto.MiniappCartNumberDto;
 import com.example.sky.dto.MiniappUserLoginDto;
+import com.example.sky.dto.ShopingCartDto;
 import com.example.sky.exception.BusinessException;
 import com.example.sky.mapper.MiniappUserMapper;
-import com.example.sky.vo.MiniappAddressBookVo;
-import com.example.sky.vo.MiniappDishVo;
-import com.example.sky.vo.MiniappDishFlavorVo;
-import com.example.sky.vo.MiniappLoginVo;
-import com.example.sky.vo.MiniappShopVo;
-import com.example.sky.vo.MiniappShopingCartVo;
-import com.example.sky.vo.MiniappUserVo;
-import com.example.sky.vo.SetmealVo;
+import com.example.sky.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +18,7 @@ import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Slf4j
@@ -56,6 +51,7 @@ public class MiniappService {
                         .build())
                 .retrieve()
                 .body(String.class);
+        log.info("微信登录信息==>{}",response);
         JSONObject jsonObject = JSONObject.parseObject(response);
         String openid = jsonObject.getString("openid");
         if (openid == null || openid.isEmpty()) {
@@ -206,5 +202,30 @@ public class MiniappService {
             throw new BusinessException(404, "店铺不存在");
         }
         return shop;
+    }
+
+    @Transactional
+    public Integer addShopCart(String openId, ShopingCartDto cartData) {
+        Long userId = currentUserId(openId);
+
+        DishVo dishInfo = userMapper.getDishInfoMapper(cartData.getDishId());
+
+        MiniappShopingCartVo exist = userMapper.getCartItem(
+                userId, cartData.getDishId(), cartData.getDishFlavor());
+
+        if (exist != null) {
+            return userMapper.updateNumber(exist.getId(), exist.getNumber() + 1);
+        }
+
+        MiniappShopingCartVo cartVo = new MiniappShopingCartVo()
+                .setUserId(userId)
+                .setImage(dishInfo.getImage())
+                .setName(dishInfo.getName())
+                .setAmount(dishInfo.getPrice())
+                .setDishId(cartData.getDishId())
+                .setDishFlavor(cartData.getDishFlavor())
+                .setNumber(1);
+
+        return userMapper.insertCart(cartVo);
     }
 }

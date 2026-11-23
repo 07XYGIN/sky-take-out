@@ -138,14 +138,14 @@
       <!-- openDetailHandle 这个函数触发的菜品详情 -->
       <view class="pop_mask" v-show="openDetailPop" style="z-index: 9999">
         <dishDetail :dishDetailes="dishDetailes" :openDetailPop="openDetailPop" :dishMealData="dishMealData"
-          @redDishAction="redDishAction" @addDishAction="addDishAction" @moreNormDataesHandle="moreNormDataesHandle"
+          @redDishAction="handlePopupSubtractDish" @addDishAction="handlePopupAddDish" @moreNormDataesHandle="moreNormDataesHandle"
           @dishClose="dishClose"></dishDetail>
       </view>
       <!-- 菜品详情 - end -->
       <!-- 购物车弹框 - start -->
       <view class="pop_mask" v-show="openOrderCartList" @click="openOrderCartList = !openOrderCartList">
         <popCart :openOrderCartLis="openOrderCartList" :orderAndUserInfo="orderAndUserInfo"
-          @clearCardOrder="clearCardOrder" @addDishAction="addDishAction" @redDishAction="redDishAction"></popCart>
+          @clearCardOrder="clearCardOrder" @addDishAction="handlePopupAddDish" @redDishAction="handlePopupSubtractDish"></popCart>
       </view>
       <!-- 购物车弹框 - end -->
       <view class="pop_mask" v-show="loaddingSt">

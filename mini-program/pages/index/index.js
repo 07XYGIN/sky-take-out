@@ -381,7 +381,7 @@ export default {
 		// 获取购物车订单列表
 		async getTableOrderDishListes() {
 			// 调用获取购物车集合接口
-			await getShoppingCartList({})
+			await getShoppingCartList({userid:this.$store.state.baseUserInfo.id})
 				.then((res) => {
 					if (res.code === 1) {
 						this.initdishListMut(res.data)
@@ -395,6 +395,12 @@ export default {
 			uni.navigateTo({
 				url: "/pages/order/index",
 			})
+		},
+		handlePopupAddDish({ obj, item }) {
+			return this.addDishAction(obj, item)
+		},
+		handlePopupSubtractDish({ obj, item }) {
+			return this.redDishAction(obj, item)
 		},
 		// 加菜 - 添加菜品
 		async addDishAction(item, form) {

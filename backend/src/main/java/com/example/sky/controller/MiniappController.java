@@ -1,10 +1,7 @@
 package com.example.sky.controller;
 
 import com.example.sky.common.Result;
-import com.example.sky.dto.MiniappAddressDefaultDto;
-import com.example.sky.dto.MiniappCartItemDto;
-import com.example.sky.dto.MiniappCartNumberDto;
-import com.example.sky.dto.MiniappUserLoginDto;
+import com.example.sky.dto.*;
 import com.example.sky.service.CategoryService;
 import com.example.sky.service.MiniappService;
 import com.example.sky.vo.*;
@@ -128,5 +125,11 @@ public class MiniappController {
     @GetMapping("/shop/getMerchantInfo")
     public Result<MiniappShopVo> getMerchantInfo(@RequestParam(defaultValue = "1") Long shopId) {
         return Result.success(miniappService.getMerchantInfoService(shopId));
+    }
+
+    @PostMapping("/shoppingCart/add")
+    public Result<?> addshoppingCart(@Valid @RequestBody ShopingCartDto CartData, Authentication authentication) {
+        miniappService.addShopCart(authentication.getName(),CartData);
+        return Result.ok();
     }
 }
