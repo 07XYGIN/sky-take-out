@@ -85,7 +85,8 @@
     <update id="updateOrderStatus">
         UPDATE orders
         <set>
-            status = #{status},
+            status = CASE WHEN #{status} = 6 AND pay_status = 1 THEN 7 ELSE #{status} END,
+            pay_status = CASE WHEN #{status} = 6 AND pay_status = 1 THEN 2 ELSE pay_status END,
             <if test="status == 6">
                 cancel_reason = #{cancelReason},
                 cancel_time = NOW(),

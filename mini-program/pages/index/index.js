@@ -26,7 +26,6 @@ import {
 	getMerchantInfo,
 } from "../api/api.js"
 import { mapState, mapMutations } from "vuex"
-import { baseUrl } from "../../utils/env"
 export default {
 	data() {
 		return {
@@ -373,10 +372,6 @@ export default {
                     this.setDeliveryFee(res.data.deliveryFee == null ? null : Number(res.data.deliveryFee))
 				})
 				.catch((err) => { })
-		},
-		// 重新拼装image
-		getNewImage(image) {
-			return `${baseUrl}/common/download?name=${image}`
 		},
 		// 获取购物车订单列表
 		async getTableOrderDishListes() {

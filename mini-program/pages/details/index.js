@@ -2,12 +2,11 @@
 import {
 	getOrderDetail,
 	repetitionOrder,
-	delShoppingCart,
 	reminderOrder,
 	cancelOrder,
+	refundOrder,
 } from '../api/api.js'
 import { mapState, mapMutations } from 'vuex'
-import { baseUrl } from '../../utils/env'
 import { call } from '@/utils/index.js'
 import Status from './components/status.vue'//订单状态
 import OrderDetail from "./components/orderDetail.vue" //菜品详情
@@ -85,7 +84,7 @@ export default {
 				if (res.code === 1) {
 					this.showConfirm = true
 					this.textTip = '您的催单信息已发出！'
-					this.$refs.status.$refs.commonPopup.open(val.type)
+                    this.$refs.commonPopup.open(val.type)
 					this.orderId = val.id
 				}
 			})
@@ -96,26 +95,24 @@ export default {
 				if (res.code === 1) {
 					this.isPayment = true
 					this.showConfirm = true
-					this.textTip = '您的订单已取消！'
-					this.$refs.status.$refs.commonPopup.open(type)
+					this.textTip = obj.payStatus === 1 ? '订单已取消，退款状态已更新！' : '您的订单已取消！'
+					this.$refs.commonPopup.open(type)
 					this.orderId = obj.id
 				}
 			})
 		},
 		// 取消订单
 		handleCancel(val) {
-			if (val.obj.status === 1 || val.obj.status === 2) {
+			if ([1, 2, 3, 4].includes(val.obj.status)) {
 				this.cancel(val.type, val.obj)
 			} else {
 				this.showConfirm = false
-				this.$refs.status.$refs.commonPopup.open(val.type)
+				this.$refs.commonPopup.open(val.type)
 				this.textTip = '请联系商家进行取消！'
 			}
 		},
 		// 再来一单
 		async oneMoreOrder(id) {
-			// 先清空购物车
-			await delShoppingCart()
 			repetitionOrder(id).then(res => {
 				if (res.code === 1) {
 					uni.redirectTo({
@@ -180,10 +177,6 @@ export default {
 			}
 		},
 
-		// 重新拼装image
-		getNewImage(image) {
-			return `${baseUrl}/common/download?name=${image}`
-		},
 		// 返回上一级
 		goBack() {
 			uni.redirectTo({
@@ -191,13 +184,16 @@ export default {
 			})
 		},
 		openPopuos(type) {
-			this.$refs.status.$refs.commonPopup.open(type)
+			this.$refs.commonPopup.open(type)
 		},
 		// 联系商家进行退款弹层
-		handleRefund(type) {
-			this.showConfirm = false
-			this.openPopuos(type)
-			this.textTip = '请联系商家进行退款！'
+		handleRefund(refund) {
+			refundOrder(refund.id).then(() => {
+				this.showConfirm = true
+				this.textTip = '退款状态已更新！'
+				this.orderId = refund.id
+				this.openPopuos(refund.type)
+			})
 		},
 		// 拨打电话弹层
 		handlePhone(type, phone) {
@@ -212,7 +208,7 @@ export default {
 		},
 		// closePopupInfo
 		closePopupInfo(type) {
-			this.$refs.status.$refs.commonPopup.close(type)
+			this.$refs.commonPopup.close(type)
 			this.getBaseData(this.orderId)
 		},
 		// 立即支付

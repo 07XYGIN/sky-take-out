@@ -82,7 +82,6 @@ import {
   getOrderPage,
   repetitionOrder,
   reminderOrder,
-  delShoppingCart,
   queryOrdersCheckStatus
 } from "../api/api.js";
 import { mapMutations } from "vuex";
@@ -209,8 +208,6 @@ export default {
       let routeIndex = pages.findIndex(
         (item) => item.route === "pages/index/index"
       );
-      // 先清空购物车
-      await delShoppingCart();
       repetitionOrder(id).then((res) => {
         if (res.code === 1) {
           uni.navigateBack({
@@ -232,7 +229,7 @@ export default {
         this.payStatus = 0
       } else if (index === 2) {
         // 退款
-        this.status = 6;
+        this.status = 7;
         this.payStatus = 2
       }
       else {

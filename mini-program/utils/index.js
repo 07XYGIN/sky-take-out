@@ -51,7 +51,7 @@ export const getLableVal = (item) => {
 // };
 // 状态
 export const statusWord = (status) => {
-    const labels = { 1: '待付款', 2: '待接单', 3: '已接单', 4: '派送中', 5: '已完成', 6: '已取消', 7: '退款中' }
+    const labels = { 1: '待付款', 2: '待接单', 3: '已接单', 4: '派送中', 5: '已完成', 6: '已取消', 7: '已退款' }
     return labels[status] || '未知状态'
 }
 // 倒计时

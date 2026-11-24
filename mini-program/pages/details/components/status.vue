@@ -34,7 +34,7 @@
             v-if="orderDetailsData.status === 2">
             催单
           </button>
-          <button class="new_btn" type="default" @click="handleRefund('center')" v-if="orderDetailsData.status == 5">
+          <button class="new_btn" type="default" @click="handleRefund('center', orderDetailsData.id)" v-if="orderDetailsData.status == 5">
             申请退款
           </button>
           <button class="new_btn" type="default" @click="oneMoreOrder(orderDetailsData.id)"
@@ -46,7 +46,7 @@
     </view>
     <view class="box timeTip" v-if="!timeout && orderDetailsData.status === 1">
       <view class="icon newIcon"></view>
-      请在15分钟内完成支付，超时将自动取消。
+      请在15分钟内完成支付，超时后将无法支付。
     </view>
     <view class="box timeTip" v-if="orderDetailsData.status === 6 && orderDetailsData.payStatus === 2">
       <view class="icon moneyIcon"></view>
@@ -97,8 +97,8 @@ export default {
       this.$emit("handleReminder", { type: type, id: id });
     },
     // 申请退款
-    handleRefund(type) {
-      this.$emit("handleRefund", type);
+    handleRefund(type, id) {
+      this.$emit("handleRefund", { type, id });
     },
     // 再来一单
     oneMoreOrder(id) {

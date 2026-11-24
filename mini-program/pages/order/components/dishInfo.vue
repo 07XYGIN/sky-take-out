@@ -80,7 +80,6 @@
   </view>
 </template>
 <script>
-import { editHoppingCart } from '../../api/api'
 import Pikers from '@/components/uni-piker/index.vue'
 export default {
   // 获取父级传的数据

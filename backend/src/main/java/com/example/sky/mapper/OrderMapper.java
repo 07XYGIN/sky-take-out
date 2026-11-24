@@ -4,6 +4,7 @@ import com.example.sky.dto.OrderDto;
 import com.example.sky.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -20,4 +21,7 @@ public interface OrderMapper {
                           @Param("status") int status,
                           @Param("cancelReason") String cancelReason);
     OrderDetailVO orderDetail(@Param("orderId") String orderId);
+
+    @Select("select user_id from orders where number = #{number}")
+    Long orderUserIdMapper(String number);
 }

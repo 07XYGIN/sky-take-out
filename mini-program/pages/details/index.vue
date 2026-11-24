@@ -8,8 +8,8 @@
       <view class="order_content_box" scroll-y="true" scroll-top="0rpx">
         <!-- 支付状态 -->
         <status ref="status" :timeout="timeout" :orderDetailsData="orderDetailsData" :rocallTime="rocallTime"
-          @statusWord="statusWord" @paymentTime="paymentTime" @handlePay="handlePay" @handleReminder="handleReminder"
-          @handleRefund="handleRefund"></status>
+          @handlePay="handlePay" @handleReminder="handleReminder"
+          @handleCancel="handleCancel" @oneMoreOrder="oneMoreOrder" @handleRefund="handleRefund"></status>
         <!-- end -->
         <!-- 订单详情 -->
         <order-detail :orderDataes="orderDataes" :orderDetailsData="orderDetailsData"
@@ -63,7 +63,6 @@
     </view>
   </view>
 </template>
-<script src="../../utils/common.js"></script>
 <script src="./index.js"></script>
 <style src="./../common/Navbar/navbar.scss" lang="scss" scoped></style>
 <style src="../order/style.scss" lang="scss"></style>

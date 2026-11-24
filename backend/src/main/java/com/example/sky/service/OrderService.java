@@ -21,6 +21,7 @@ import java.util.List;
 
 public class OrderService {
     private final OrderMapper orderMapper;
+    private final MiniappService miniappService;
     public BusinessVo BusinessService() {
         return orderMapper.BusinessData();
     };
@@ -41,9 +42,14 @@ public class OrderService {
         return orderMapper.conditionSearchTab();
     }
     public int updateOrderStatusService(String number, int status, String cancelReason) {
+        Long userId = orderMapper.orderUserIdMapper(number);
         int result = orderMapper.updateOrderStatus(number, status, cancelReason);
         if (result == 0) {
             throw new BusinessException(500, "发生未知错误，更新失败");
+        }
+        // 管理端接单、配送、完成或取消后，删除该用户的小程序历史订单缓存。
+        if (userId != null) {
+            miniappService.deleteOrderHistoryCache(userId);
         }
         return result;
     }

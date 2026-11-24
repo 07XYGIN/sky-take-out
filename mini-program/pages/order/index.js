@@ -3,15 +3,12 @@ import {
 	submitOrderSubmit,
 	// 查询默认地址
 	getAddressBookDefault,
-	queryAddressBookList, getEstimatedDeliveryTime
+	queryAddressBookList, deliveryTimes
 } from '../api/api.js'
 import {
 	mapState,
 	mapMutations,
 } from 'vuex'
-import {
-	baseUrl
-} from '../../utils/env'
 import {
 	getLableVal,
 	dateFormat,
@@ -137,6 +134,16 @@ export default {
 		this.gender = this.$store.state.baseUserInfo && this.$store.state.baseUserInfo.gender
 		this.remark = this.remarkData()
 		this.init()
+		const now = new Date()
+		const currentMinutes = now.getHours() * 60 + now.getMinutes()
+		this.deliveryOptions = {
+			today: deliveryTimes.today.filter((time) => {
+				const [hour, minute] = time.split(':').map(Number)
+				return hour * 60 + minute > currentMinutes
+			}),
+			tomorrow: deliveryTimes.tomorrow
+		}
+		this.orderTime = dayjs().format('YYYY-MM-DD HH:mm:ss')
 		// 存在options说明换地址了
 		if (this.addressData() && this.addressData().detail) {
 			this.addressBookId = ''
@@ -153,7 +160,7 @@ export default {
 			await this.getAddressBookDefault()
 		}
 
-		await this.getEstimatedDeliveryTime();
+		this.arrivalTime = '立即派送'
 		this.getDateDate()
 		this.setArrivalTime(this.arrivalTime)
 		this.setGender(this.gender)
@@ -176,23 +183,6 @@ export default {
 			const res = uni.getSystemInfoSync()
 			this.platform = res.platform
 		},
-		// 获取用户送餐期望时间
-		async getEstimatedDeliveryTime() {
-            if (!this.addressBookId) return
-            const result = await getEstimatedDeliveryTime({ addressBookId: this.addressBookId })
-            const data = result.data
-            if (!data || !data.estimatedDeliveryTime) {
-                uni.showToast({ title: '配送时间暂不可用', icon: 'none' })
-                return
-            }
-            this.orderTime = data.estimatedDeliveryTime
-            this.deliveryOptions = {
-                today: data.today || [],
-                tomorrow: data.tomorrow || []
-            }
-            this.arrivalTime = '立即派送'
-            this.getDateDate()
-        },
         getDateDate() {
             if (!this.orderTime) {
                 this.newDateData = []
@@ -242,9 +232,6 @@ export default {
 
 		},
 		// // 重新拼装image
-		getNewImage(image) {
-			return `${baseUrl}/common/download?name=${image}`
-		},
 		// 订单里和总订单价格计算
 		computOrderInfo() {
 			let oriData = this.orderListDataes
@@ -296,10 +283,7 @@ export default {
 				deliveryStatus: this.arrivalTime === '立即派送' ? 1 : 0,
 				tablewareStatus: this.status,
 				tablewareNumber: this.num,
-				packAmount: this.packAmount,
-				amount: this.orderDishPrice,
-				shopId: this.shopInfo().shopId,
-				deliveryFee: this.deliveryFee()
+				shopId: this.shopInfo().shopId
 			}
 
 			submitOrderSubmit(params).then(res => {

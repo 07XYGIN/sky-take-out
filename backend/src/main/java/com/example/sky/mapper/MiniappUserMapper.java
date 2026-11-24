@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Options;
 
 import java.util.List;
 
@@ -90,33 +91,93 @@ public interface MiniappUserMapper {
     @Update("update address_book set is_default = case when id = #{id} then 1 else 0 end where user_id = #{userId}")
     int setDefaultAddressMapper(@Param("id") Long id, @Param("userId") Long userId);
 
-    @Update("update orders set status = 6, cancel_reason = '用户主动取消', cancel_time = now() " +
-            "where id = #{id} and user_id = #{userId} and status = 1 and pay_status = 0")
-    int cancelUnpaidOrderMapper(@Param("id") Long id, @Param("userId") Long userId);
+    @Update("update orders set status = case when pay_status = 1 then 7 else 6 end, " +
+            "pay_status = case when pay_status = 1 then 2 else pay_status end, " +
+            "cancel_reason = '用户主动取消', cancel_time = now() " +
+            "where id = #{id} and user_id = #{userId} " +
+            "and ((status = 1 and pay_status = 0) or (status in (2,3,4) and pay_status = 1))")
+    int cancelOrderMapper(@Param("id") Long id, @Param("userId") Long userId);
 
     @Select("select status from shop where shop_id = #{shopId}")
     Integer shopStatusMapper(Long shopId);
 
     @Select("select shop_id, shop_name, image, description, shop_address, phone, status, delivery_fee, pack_price " +
+            "from shop where shop_id = #{shopId} and status = 1")
+    MiniappShopVo activeShopMapper(Long shopId);
+
+    @Select("select shop_id, shop_name, image, description, shop_address, phone, status, delivery_fee, pack_price " +
             "from shop where shop_id = #{shopId}")
     MiniappShopVo getMerchantInfoMapper(Long shopId);
 
-    @Select("select d.name AS name,d.image AS image ,d.id AS dish_id,d.price AS price from dish d where d.id = #{dishId}")
+    @Select("select id, name, image, price, status from dish where id = #{dishId}")
     DishVo getDishInfoMapper(Long dishId);
 
+    @Select("select id, name, image, price, status from setmeal where id = #{setmealId}")
+    SetmealVo getSetmealInfoMapper(Long setmealId);
+
+    @Select("select sd.dish_id as id, sd.name, sd.price, sd.copies, d.image, d.description " +
+            "from setmeal_dish sd left join dish d on sd.dish_id = d.id " +
+            "where sd.setmeal_id = #{setmealId} order by sd.id")
+    List<MiniappSetmealDishVo> setmealDishesMapper(Long setmealId);
+
     @Insert("insert into shopping_cart (" +
-            "name, image, user_id, dish_id, dish_flavor, amount" +
+            "name, image, user_id, dish_id, setmeal_id, dish_flavor, amount, number, create_time" +
             ") values (" +
-            "#{name}, #{image}, #{userId}, #{dishId}, #{dishFlavor}, #{amount}" +
+            "#{name}, #{image}, #{userId}, #{dishId}, #{setmealId}, #{dishFlavor}, #{amount}, #{number}, now()" +
             ")")
     int insertCart(MiniappShopingCartVo shoppingCart);
 
-    @Select("select * from shopping_cart " +
-            "where user_id = #{userId} and dish_id = #{dishId} and dish_flavor = #{dishFlavor}")
-    MiniappShopingCartVo getCartItem(@Param("userId") Long userId,
-                                     @Param("dishId") Long dishId,
-                                     @Param("dishFlavor") String dishFlavor);
+    @Select("select id from user where id = #{userId} for update")
+    Long lockCartUserMapper(Long userId);
 
-    @Update("update shopping_cart set number = #{number} where id = #{id}")
-    Integer updateNumber(@Param("id") Long id, @Param("number") Integer number);
+    @Update("update shopping_cart set number = number + #{number}, name = #{name}, image = #{image}, amount = #{amount} " +
+            "where id = #{id} and user_id = #{userId}")
+    int increaseCartItemMapper(MiniappShopingCartVo shoppingCart);
+
+    @Select("select o.*, date_add(o.order_time, interval 15 minute) as pay_deadline " +
+            "from orders o where o.user_id = #{userId} order by o.order_time desc, o.id desc")
+    List<MiniappOrderVo> historyOrdersMapper(Long userId);
+
+    @Select("select o.*, date_add(o.order_time, interval 15 minute) as pay_deadline " +
+            "from orders o where o.id = #{id} and o.user_id = #{userId}")
+    MiniappOrderVo userOrderByIdMapper(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Select({"<script>",
+            "select id, order_id, dish_id, setmeal_id, name, image, dish_flavor, number, amount from order_detail",
+            "where order_id in",
+            "<foreach collection='orderIds' item='id' open='(' separator=',' close=')'>#{id}</foreach>",
+            "order by order_id, id",
+            "</script>"})
+    List<MiniappOrderDetailVo> orderDetailsMapper(@Param("orderIds") List<Long> orderIds);
+
+    @Insert("insert into orders (number, status, user_id, address_book_id, order_time, pay_method, pay_status, " +
+            "amount, remark, phone, address, user_name, consignee, sex, estimated_delivery_time, delivery_status, " +
+            "pack_amount, tableware_number, tableware_status, shop_id, shop_name, shop_telephone, delivery_fee) " +
+            "values (#{number}, 1, #{userId}, #{addressBookId}, #{orderTime}, 1, 0, " +
+            "#{amount}, #{remark}, #{phone}, #{address}, #{consignee}, #{consignee}, #{sex}, #{estimatedDeliveryTime}, " +
+            "#{deliveryStatus}, #{packAmount}, #{tablewareNumber}, #{tablewareStatus}, #{shopId}, " +
+            "#{shopName}, #{shopTelephone}, #{deliveryFee})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insertOrderMapper(MiniappOrderVo order);
+
+    @Insert("insert into order_detail (order_id, dish_id, setmeal_id, name, image, dish_flavor, number, amount) " +
+            "values (#{orderId}, #{dishId}, #{setmealId}, #{name}, #{image}, #{dishFlavor}, #{number}, #{amount})")
+    int insertOrderDetailMapper(MiniappOrderDetailVo detail);
+
+    @Select("select o.*, date_add(o.order_time, interval 15 minute) as pay_deadline " +
+            "from orders o where o.number = #{number} and o.user_id = #{userId}")
+    MiniappOrderVo userOrderByNumberMapper(@Param("number") String number, @Param("userId") Long userId);
+
+    @Update("update orders set status = 2, pay_status = 1, checkout_time = now() " +
+            "where id = #{id} and user_id = #{userId} and status = 1 and pay_status = 0 " +
+            "and order_time >= date_sub(now(), interval 15 minute)")
+    int payOrderMapper(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Update("update orders set status = 7, pay_status = 2, cancel_time = now(), cancel_reason = '用户申请退款' " +
+            "where id = #{id} and user_id = #{userId} and status in (2,3,4,5) and pay_status = 1")
+    int refundOrderMapper(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Update("update orders set reminder_count = reminder_count + 1, reminder_time = now() " +
+            "where id = #{id} and user_id = #{userId} and status in (2,3,4) and pay_status = 1")
+    int remindOrderMapper(@Param("id") Long id, @Param("userId") Long userId);
 }

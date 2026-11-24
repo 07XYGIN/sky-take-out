@@ -13,37 +13,7 @@
           <view class="money"
             >￥<text>{{ orderDataInfo.orderAmount }}</text></view
           >
-          <view>{{ shopInfo().shopName }}-{{ orderDataInfo.orderNumber }}</view>
-        </view>
-      </view>
-      <view class="box payBox">
-        <view class="contion">
-          <view class="example-body">
-            <radio-group class="uni-list" @change="styleChange">
-              <view class="uni-list-item">
-                <view
-                  class="uni-list-item__container"
-                  v-for="(item, index) in payMethodList"
-                  :key="item"
-                >
-                  <view class="uni-list-item__content">
-                    <icon class="wechatIcon"></icon
-                    ><text class="uni-list-item__content-title">{{
-                      item
-                    }}</text>
-                  </view>
-                  <view class="uni-list-item__extra">
-                    <radio
-                      :value="item"
-                      color="#FFC200"
-                      :checked="index == activeRadio"
-                      class="radioIcon"
-                    />
-                  </view>
-                </view>
-              </view>
-            </radio-group>
-          </view>
+          <view>{{ orderDataInfo.shopName }}-{{ orderDataInfo.orderNumber }}</view>
         </view>
       </view>
       <view class="bottomBox btnBox">
@@ -56,7 +26,6 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import { paymentOrder, getOrderDetail } from "@/pages/api/api.js";
 export default {
   data() {
@@ -65,8 +34,6 @@ export default {
       rocallTime: "",
       orderId: null,
       orderDataInfo: {},
-      activeRadio: 0,
-      payMethodList: ["微信支付"],
       times: null,
       paying: false,
       ready: false
@@ -82,8 +49,6 @@ export default {
   },
   onUnload() { clearTimeout(this.times); },
   methods: {
-    ...mapState(["shopInfo"]),
-    styleChange() { this.activeRadio = 0; },
     async loadOrder() {
       const response = await getOrderDetail(this.orderId);
       const order = response.data;
@@ -99,30 +64,13 @@ export default {
       if (this.paying || !this.ready || this.timeout) return;
       this.paying = true;
       try {
-        const response = await paymentOrder({
-          orderNumber: this.orderDataInfo.orderNumber,
-          payMethod: 1
-        });
-        const data = response.data;
-        if (!data || !data.timeStamp || !data.paySign || !(data.packageStr || data.package)) {
-          throw new Error("后端未返回完整的微信支付参数");
-        }
-        await new Promise((resolve, reject) => {
-          uni.requestPayment({
-            ...data,
-            package: data.packageStr || data.package,
-            success: resolve,
-            fail: reject
-          });
-        });
-        // 微信回调后再查后端订单，支付回调尚未入库时先进入详情页。
-        const result = await getOrderDetail(this.orderId);
-        const paid = Number(result.data.payStatus) === 1;
+        await paymentOrder({ orderNumber: this.orderDataInfo.orderNumber });
+        await getOrderDetail(this.orderId);
         uni.redirectTo({
-          url: (paid ? "/pages/success/index?orderId=" : "/pages/details/index?orderId=") + this.orderId
+          url: "/pages/success/index?orderId=" + this.orderId
         });
       } catch (error) {
-        uni.showToast({ title: error.message || "支付未完成，请重试", icon: "none" });
+        uni.showToast({ title: error.message || "支付状态更新失败，请重试", icon: "none" });
       } finally {
         this.paying = false;
       }

@@ -1,4 +1,6 @@
-CREATE DATABASE  IF NOT EXISTS `sky_take_out` ;
+-- 初始化脚本：重建项目表结构及基础数据，请勿在需要保留数据的库中重复执行。
+SET NAMES utf8mb4;
+CREATE DATABASE IF NOT EXISTS `sky_take_out` DEFAULT CHARACTER SET utf8mb4;
 USE `sky_take_out`;
 
 DROP TABLE IF EXISTS `address_book`;
@@ -179,9 +181,16 @@ CREATE TABLE `orders` (
   `estimated_delivery_time` datetime DEFAULT NULL COMMENT '预计送达时间',
   `delivery_status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '配送状态  1立即送出  0选择具体时间',
   `delivery_time` datetime DEFAULT NULL COMMENT '送达时间',
-  `pack_amount` int DEFAULT NULL COMMENT '打包费',
+  `pack_amount` decimal(10,2) DEFAULT NULL COMMENT '包装费，单位元',
   `tableware_number` int DEFAULT NULL COMMENT '餐具数量',
   `tableware_status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '餐具数量状态  1按餐量提供  0选择具体数量',
+  `shop_id` bigint DEFAULT NULL COMMENT '店铺ID',
+  `shop_name` varchar(64) DEFAULT NULL COMMENT '下单时店铺名称',
+  `shop_telephone` varchar(20) DEFAULT NULL COMMENT '下单时店铺电话',
+  `sex` varchar(2) DEFAULT NULL COMMENT '收货人性别',
+  `delivery_fee` decimal(10,2) DEFAULT NULL COMMENT '下单时配送费，单位元',
+  `reminder_count` int NOT NULL DEFAULT '0' COMMENT '催单次数',
+  `reminder_time` datetime DEFAULT NULL COMMENT '最近催单时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='订单表';
 
@@ -240,3 +249,35 @@ CREATE TABLE `user` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='用户信息';
+
+DROP TABLE IF EXISTS `shop`;
+CREATE TABLE `shop` (
+  `shop_id` bigint NOT NULL AUTO_INCREMENT COMMENT '店铺主键',
+  `shop_name` varchar(64) NOT NULL COMMENT '店铺名称',
+  `image` varchar(512) DEFAULT NULL COMMENT '店铺图片地址',
+  `description` varchar(1000) NOT NULL DEFAULT '' COMMENT '店铺介绍',
+  `shop_address` varchar(255) NOT NULL COMMENT '店铺地址',
+  `phone` varchar(20) NOT NULL COMMENT '商家联系电话',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '营业状态：0休息，1营业',
+  `delivery_fee` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '每单配送费，单位元',
+  `pack_price` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '每件商品包装费，单位元',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`shop_id`),
+  CONSTRAINT `chk_shop_status` CHECK (`status` IN (0, 1)),
+  CONSTRAINT `chk_shop_delivery_fee` CHECK (`delivery_fee` >= 0),
+  CONSTRAINT `chk_shop_pack_price` CHECK (`pack_price` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='店铺信息';
+
+INSERT INTO `shop`
+  (`shop_id`, `shop_name`, `image`, `description`, `shop_address`, `phone`, `status`, `delivery_fee`, `pack_price`)
+VALUES
+  (1, '苍穹外卖（科技园店）', '/static/logo_ruiji.png',
+   '主打川味家常菜与酸菜鱼，提供工作日午餐和晚餐。',
+   '北京市海淀区示例路1号科技园A座一层（测试地址）', '010-00000001', 1, 3.00, 1.00),
+  (2, '苍穹外卖（大学城店）', '/static/logo_ruiji.png',
+   '提供实惠单人餐、双人套餐和饮料。',
+   '北京市海淀区示例路2号大学城商业街（测试地址）', '010-00000002', 1, 2.00, 0.50),
+  (3, '苍穹外卖（商务中心店）', '/static/logo_ruiji.png',
+   '提供商务套餐和多人餐，当前休息中。',
+   '北京市朝阳区示例路3号商务中心B座一层（测试地址）', '010-00000003', 0, 5.00, 1.50);

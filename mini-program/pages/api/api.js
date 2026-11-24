@@ -1,91 +1,9 @@
 import { request } from "../../utils/request.js"
 
-// 开桌
-export const openTable = (params) =>
-	request({
-		url: `/miniapp/table/open/${params.tableId}/${params.seatNumber}`,
-		method: 'GET',
-		params
-	})
-
-// 获取桌台状态
-export const getTableState = (params) =>
-	request({
-		url: `/miniapp/table/tableStatus/${params.shopId}/${params.storeId}/${params.tableId}`,
-		method: 'GET',
-		params,
-	})
-
-// 获取购物车菜品
-export const getTableOrderDishList = (params) =>
-	request({
-		url: `/miniapp/order/shopCart//${params.tableId}`,
-		method: 'GET',
-		params
-	})
-// 获取菜品规格
-export const getMoreNorm = (params) =>
-	request({
-		url: `/miniapp/dish/flavor/${params.dishId}`,
-		method: 'GET',
-		params,
-	})
-
-// 获取菜品分类列表	
-export const getList = (params) =>
-	request({
-		url: `/miniapp/dish/category`,
-		method: 'GET',
-		params,
-	})
-
-// 获取菜品详情	
-export const getDishDetail = (params) =>
-	request({
-		url: `/miniapp/dish/setmealDishList/${params.setmealId}`,
-		method: 'GET',
-		params,
-	})
-
-// 根据分类获取菜品列表
-export const getDishList = (params) =>
-	request({
-		url: `/miniapp/dish/dishPageList/${params.categoryId}/${params.type}/${params.page}/${params.pageSize}`,
-		method: 'GET',
-		params
-	})
-
-// 加菜
-export const addDish = (params) =>
-	request({
-		url: `/miniapp/order/addDish`,
-		method: 'POST',
-		params
-	})
-
-// 减菜
-export const delDish = (params) =>
-	request({
-		url: `/miniapp/order/decreaseDish/${params.tableId}/${params.dishId}`,
-		method: 'GET',
-		params
-	})
-
-// 清空购物车
-export const clearOrder = (params) =>
-	request({
-		url: `/miniapp/order/cleanShopCart/${params.tableId}`,
-		method: 'GET',
-		params
-	})
-
-// 提交订单 
-export const payOrder = (params) =>
-	request({
-		url: `/miniapp/order/pay/${params.tableId}/${params.jsCode}`,
-		method: 'GET',
-		params
-	})
+export const deliveryTimes = {
+	today: ['18:00', '18:30', '19:00', '19:30', '20:00'],
+	tomorrow: ['11:00', '11:30', '12:00', '18:00', '18:30', '19:00', '19:30', '20:00']
+}
 
 
 // 用户登录
@@ -115,25 +33,6 @@ export const dishListByCategoryId = (params) => {
 	})
 }
 
-// 文件下载---预览
-export const commonDownload = (params) => {
-	return request({
-		url: '/miniapp/common/download',
-		method: 'GET',
-		params
-	})
-}
-
-
-// 购物车----加菜功能实现
-export const addShoppingCart = (params) => {
-	return request({
-		url: '/miniapp/shoppingCart',
-		method: 'POST',
-		params
-	})
-}
-
 // 根据type类型查询是套餐的接口
 export const querySetmeaList = (params) => {
 	return request({
@@ -148,16 +47,6 @@ export const getShoppingCartList = (params) => {
 	return request({
 		url: '/miniapp/shoppingCart/list',
 		method: 'GET',
-		params
-	})
-}
-
-
-// 修改购物车数量功能
-export const editHoppingCart = (params) => {
-	return request({
-		url: '/miniapp/shoppingCart',
-		method: 'PUT',
 		params
 	})
 }
@@ -188,16 +77,6 @@ export const delShoppingCart = (params) => {
 	return request({
 		url: '/miniapp/shoppingCart/clean',
 		method: 'DELETE',
-		params
-	})
-}
-
-
-// 最近订单和历史订单
-export const queryOrderUserPage = (params) => {
-	return request({
-		url: '/miniapp/order/userPage',
-		method: 'GET',
 		params
 	})
 }
@@ -269,15 +148,6 @@ export const queryAddressBookById = (params) => {
 }
 
 
-// 再来一单
-export const oneOrderAgain = (params) => {
-	return request({
-		url: '/miniapp/order/again',
-		method: 'POST',
-		params
-	})
-}
-
 // 查询默认地址
 export const getAddressBookDefault = () => {
 	return request({
@@ -329,6 +199,11 @@ export const cancelOrder = (params) =>
 		url: `/miniapp/order/cancel/${params}`,
 		method: 'PUT'
 	})
+export const refundOrder = (params) =>
+	request({
+		url: `/miniapp/order/refund/${params}`,
+		method: 'PUT'
+	})
 // 催单
 export const reminderOrder = (params) =>
 	request({
@@ -351,13 +226,6 @@ export const repetitionOrder = (params) =>
 	})
 
 
-// 获取用户送餐期望时间
-export const getEstimatedDeliveryTime = (params) =>
-	request({
-		url: `/miniapp/order/getEstimatedDeliveryTime`,
-		method: 'get',
-		params
-	})
 // 查询用户订单支付状态列表信息
 export const queryOrdersCheckStatus = (params) =>
 	request({

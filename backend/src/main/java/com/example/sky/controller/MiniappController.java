@@ -1,6 +1,7 @@
 package com.example.sky.controller;
 
 import com.example.sky.common.Result;
+import com.example.sky.common.PageResult;
 import com.example.sky.dto.*;
 import com.example.sky.service.CategoryService;
 import com.example.sky.service.MiniappService;
@@ -112,8 +113,8 @@ public class MiniappController {
     }
 
     @PutMapping("/order/cancel/{id}")
-    public Result<Void> cancelUnpaidOrder(@PathVariable Long id, Authentication authentication) {
-        miniappService.cancelUnpaidOrderService(authentication.getName(), id);
+    public Result<Void> cancelOrder(@PathVariable Long id, Authentication authentication) {
+        miniappService.cancelOrderService(authentication.getName(), id);
         return Result.ok();
     }
 
@@ -128,8 +129,52 @@ public class MiniappController {
     }
 
     @PostMapping("/shoppingCart/add")
-    public Result<?> addshoppingCart(@Valid @RequestBody ShopingCartDto CartData, Authentication authentication) {
+    public Result<?> addshoppingCart(@Valid @RequestBody MiniappCartItemDto CartData, Authentication authentication) {
         miniappService.addShopCart(authentication.getName(),CartData);
+        return Result.ok();
+    }
+
+    @GetMapping("/setmeal/dish/{id}")
+    public Result<List<MiniappSetmealDishVo>> setmealDishes(@PathVariable Long id) {
+        return Result.success(miniappService.setmealDishesService(id));
+    }
+
+    @GetMapping({"/order/historyOrders", "/order/queryOrdersCheckStatus"})
+    public Result<PageResult<MiniappOrderVo>> historyOrders(@Valid MiniappOrderPageDto query, Authentication authentication) {
+        return Result.success(miniappService.historyOrdersService(authentication.getName(), query));
+    }
+
+    @GetMapping("/order/orderDetail/{id}")
+    public Result<MiniappOrderVo> orderDetail(@PathVariable Long id, Authentication authentication) {
+        return Result.success(miniappService.orderDetailService(authentication.getName(), id));
+    }
+
+    @PostMapping("/order/repetition/{id}")
+    public Result<Void> repetitionOrder(@PathVariable Long id, Authentication authentication) {
+        miniappService.repetitionOrderService(authentication.getName(), id);
+        return Result.ok();
+    }
+
+    @PostMapping("/order/submit")
+    public Result<MiniappOrderVo> submitOrder(@Valid @RequestBody MiniappOrderSubmitDto data, Authentication authentication) {
+        return Result.success(miniappService.submitOrderService(authentication.getName(), data));
+    }
+
+    @PutMapping("/order/payment")
+    public Result<Void> paymentOrder(@Valid @RequestBody MiniappOrderPaymentDto data, Authentication authentication) {
+        miniappService.paymentOrderService(authentication.getName(), data.getOrderNumber());
+        return Result.ok();
+    }
+
+    @PutMapping("/order/refund/{id}")
+    public Result<Void> refundOrder(@PathVariable Long id, Authentication authentication) {
+        miniappService.refundOrderService(authentication.getName(), id);
+        return Result.ok();
+    }
+
+    @GetMapping("/order/reminder/{id}")
+    public Result<Void> reminderOrder(@PathVariable Long id, Authentication authentication) {
+        miniappService.reminderOrderService(authentication.getName(), id);
         return Result.ok();
     }
 }

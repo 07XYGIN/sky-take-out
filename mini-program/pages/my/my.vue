@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { getOrderPage, repetitionOrder, delShoppingCart } from "../api/api.js";
+import { getOrderPage, repetitionOrder } from "../api/api.js";
 import { mapMutations } from "vuex";
 import { statusWord, getOvertime } from "@/utils/index.js";
 
@@ -166,8 +166,6 @@ export default {
       let routeIndex = pages.findIndex(
         (item) => item.route === "pages/index/index"
       );
-      // 先清空购物车
-      await delShoppingCart();
       repetitionOrder(id).then((res) => {
         if (res.code === 1) {
           uni.navigateBack({
